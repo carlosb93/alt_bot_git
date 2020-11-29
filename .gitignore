@@ -128,3 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# API related stuff
+*.session
+runtime.txt
+Procfile
