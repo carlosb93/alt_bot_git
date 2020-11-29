@@ -1,3 +1,8 @@
+# Server data
+UTC_DELAY = -7 # Charlie's server
+# UTC_DELAY = 1 # Gustavo's server
+# UTC_DELAY = -5 # Cuban time
+
 USERNAME = '@other'
 API_HASH = 'f3d53a84ecb83d1c752299a797897897897'
 API_ID = 1500599
@@ -5,6 +10,7 @@ API_ID = 1500599
 # chats IDs
 CHAT_WARS = 408101137
 GROUP = 458696391
+BOTNIATO = 1209077540
 BOTMOBS = 1066757737
 CHAMPMOBS = 1066757737
 DEPOSIT = 'Deposit Group'

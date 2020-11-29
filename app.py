@@ -29,22 +29,46 @@ else:
     config.API_ID,
     config.API_HASH)
 
+
+############ Load Settings ############ 
 settings = {
     'foray': {
         'status': True
+    },
+    'report': {
+        'status': True,
+        'send_to': -1001186922463
+    },
+    'order': {
+        'status': True,
+        'target': '/g_def',
+        'default': '/g_def',
+        'source': 'botniato'
     }
 }
+
+
+############ Current Status ############ 
+status = {
+    'castle': None
+}
+
+
+############ Generator of cron strings ############ 
+cwc = tools.ChatWarsCron(config.UTC_DELAY)
+
 
 ############ SETTINGS ############
 
 @client.on(events.NewMessage(chats=config.GROUP, pattern='/settings'))
-async def status_all(event):
-    res = '<b>User settings:</b>\n'
+async def get_settings(event):
+    res = '<b>User settings:</b>\n\n'
     for s in settings:
-        res += "{}{}: {}\n".format(tools.emojis[s], s, tools.bool2emoji(settings[s]['status']))
-        for k in settings[s].keys():
-            if k != 'status':
-                res += "  {}: {}\n".format(k, settings[s][k])
+        res += "{} {}{}\n".format(tools.bool2emoji(settings[s]['status']),  tools.settings_emoji[s], s)
+        if event.message.text == '/settingsfull':
+            for k in settings[s].keys():
+                if k != 'status':
+                    res += "    {}: {}\n".format(k, settings[s][k])
     await tools.user_log(client, res)
 
 
@@ -62,6 +86,47 @@ async def stop_foray(event):
         await tools.user_log(client, '🗡Foray Intervene ')
     
 
+############ BATTLES ############
+
+@aiocron.crontab(cwc.minutes_before_war(4))
+async def set_order():
+    if settings['order']['status']:
+        await tools.noisy_sleep(60)
+        target = settings['order']['target']
+        # Castle Orders
+        if target in tools.castle_emojis:
+            if target != status['castle']:
+                await client.send_message(config.CHAT_WARS, '⚔Attack')
+                await tools.noisy_sleep(3,1)
+                await client.send_message(config.CHAT_WARS, target)
+            else:
+                await client.send_message(config.CHAT_WARS, '🛡Defend')                
+        # Alliance Orders
+        elif target.startswith('/ga_def') or target.startswith('/ga_atk'):
+            await client.send_message(config.CHAT_WARS, target)               
+        # Guild Orders
+        elif target.startswith('/g_def') or target.startswith('/g_atk'):
+            await client.send_message(config.CHAT_WARS, target) 
+        # Default Orders
+        else:
+            await client.send_message(config.CHAT_WARS, settings['order']['default'])   
+        
+        await tools.user_log(client, 'Order set!') 
+
+
+############ REPORT ############
+@aiocron.crontab(cwc.minutes_after_war(8))
+async def report():
+    if settings['report']['status']:
+        await client.send_message(config.CHAT_WARS, '/report')
+        await tools.user_log(client, 'Report requested') 
+
+@client.on(events.NewMessage(chats=config.CHAT_WARS, 
+    pattern='((.|\n)*)Your result on the battlefield:((.|\n)*)'))
+async def forward_report(event):
+    if settings['report']['status']:
+        await client.forward_messages(settings['report']['send_to'], event.message)      
+        await tools.user_log(client, 'Report forwarded') 
 
 
 
@@ -143,10 +208,7 @@ async def champion(event):
                 time.sleep(1)
                 await client.send_message(config.CHAMPMOBS, 'ya entre no he marcado......')
 
-    #*********** Battle Report **************************
-@aiocron.crontab(report_crontab)
-async def report():
-    await client.send_message(config.CHAT_WARS, '/report')
+
 
     #*********** Open shop **************************
 @aiocron.crontab(shop_crontab)
@@ -302,7 +364,7 @@ async def quest_funcd():
     await client.send_message(config.CHAT_WARS, '🏅Me')
   
 @aiocron.crontab(quest_crontab_a)
-async def quest_funcd():
+async def quest_funca():
     global quest
     if quest_daytime == 'afternoon':
         quest = 1
@@ -323,6 +385,7 @@ async def program_quest_func(event):
         if len(line):
             if line[0] in ['🥔', '🦅', '🦌', '🐉', '🦈', '🐺', '🌑']:
                 castle = line[0]
+                status['castle'] = line[0]
                 if ']' in line:
                     front, back = line.split(']')
                     guild = front.split('[')[-1]
@@ -456,11 +519,7 @@ async def clicking_quest(event):
 
 
 
-    #*********** BATTLES **************************
-@aiocron.crontab(battles_crontab)
-async def def_func():
-    time.sleep(1)
-    await client.send_message(config.CHAT_WARS, '🛡Defend')
+
 
 
     
@@ -469,19 +528,14 @@ async def def_func():
 @client.on(events.NewMessage(chats=config.GROUP, pattern='/status'))
 async def status_all(event):
     await client.send_message(config.CHAT_WARS, '🏅Me')
+    await tools.noisy_sleep(2, 1)
     now = datetime.now()
-    if quest_status == 1:
-        qstatus = 'enabled'
-    else:
-        qstatus = 'disabled'
-  
-    if champ == 1:
-        cstatus = 'enabled'
-    else:
-        cstatus = 'disabled'
+    qstatus = tools.bool2emoji(True if quest_status == 1 else False)
+    cstatus = tools.bool2emoji(True if champ == 1 else False)
      
     current_time = now.strftime("%H:%M:%S")    
-    msg =  '  --- STATUS ---\n\n🔋 Stamina: {} / {}\n State: {}\n'.format(endurance, endurance_max, state) 
+    msg =  '<b> Player Status:</b>\n'
+    msg += '🔋 Stamina: {} / {}\n State: {}\n'.format(endurance, endurance_max, state) 
     msg += '🏰Castle: {} Class: {}\n'.format(castle, alt_class) 
     msg += '⛰️Quest status: {} ⚔️Champion: {}\n'.format(qstatus, cstatus) 
     msg += '🔥 Quests to do: {}\n'.format(to_quest) 
@@ -490,7 +544,7 @@ async def status_all(event):
     msg += '📯 Arenas Done: {}\n'.format(daily_arenas) 
     msg += '--- server time: {}\n'.format(current_time)
     
-    await client.send_message(config.GROUP, msg)
+    await tools.user_log(client, msg)
             
 if __name__ == '__main__':
     client.start()
