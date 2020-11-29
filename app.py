@@ -37,7 +37,7 @@ settings = {
     },
     'report': {
         'status': True,
-        'send_to': -1001186922463
+        'send_to': 1209077540
     },
     'order': {
         'status': True,
