@@ -14,7 +14,7 @@ logging.basicConfig(format='[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s'
 
 #*************Credentials******************
 client = TelegramClient(config.SESSION, config.API_ID, config.API_HASH, connection_retries=1, timeout=180, connection=connection.ConnectionTcpMTProxyRandomizedIntermediate,
-proxy=('proxy.mtproto.co', 443, '11112222333344445555666677778888'))
+proxy=config.PROXY)
 
 # @client.on(events.NewMessage)flutter
 # async def my_event_handler(event):
