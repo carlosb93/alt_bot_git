@@ -132,3 +132,6 @@ dmypy.json
 *.session
 runtime.txt
 Procfile
+
+# config file
+config.py
