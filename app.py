@@ -154,9 +154,9 @@ quest_place = 'Forest'
 quest_duration = 5
 
 # battles
-battles_crontab = '56 22,6,14 * * *'
-report_crontab = '9 23,7,15 * * *'
-shop_crontab = '15 23,7,15 * * *'
+# battles_crontab = '56 22,6,14 * * *'
+# report_crontab = '9 23,7,15 * * *'
+# shop_crontab = '15 23,7,15 * * *'
 
 
 # extra data
@@ -188,7 +188,8 @@ async def monsters(event):
         logging.info('Fighting Champion')
         await client.forward_messages(config.CHAMPMOBS, event.message)
         time.sleep(2)
-        await client.send_message(config.CHAMPMOBS, '🔥🔥🔥 help 🔥🔥🔥')
+        msg = random.choice('🔥🔥🔥 help 🔥🔥🔥', 'no me dejen morir!!!', 'moriiii')
+        await client.send_message(config.CHAMPMOBS, msg)
         
     elif 'Forbidden' in event.message.message:
         logging.info('Fighting Forbidden Monsters')
@@ -205,16 +206,17 @@ async def champion(event):
                 logging.info('Fighting Champion')
                 mobs = event.message.message
                 await client.forward_messages(config.CHAT_WARS, event.message)
-                time.sleep(1)
-                await client.send_message(config.CHAMPMOBS, 'ya entre no he marcado......')
+                time.sleep(2)
+                msg = random.choice('ya entre no he marcado......', 'toy', 'quien cierra???','vamos entren','carajo')
+                await client.send_message(config.CHAMPMOBS, msg)
 
 
 
     #*********** Open shop **************************
-@aiocron.crontab(shop_crontab)
+@aiocron.crontab(cwc.minutes_after_war(10))
 async def openshop():
     global alt_class
-    if alt_class == '⚒️':
+    if alt_class == '⚒️' or alt_class == '⚗️':
         await client.send_message(config.CHAT_WARS, '/myshop_open')
  
     #*********** STAMINA RESTORED **************************
@@ -394,7 +396,7 @@ async def program_quest_func(event):
                 last_words = back.split(' ')
                 alt_class = tools.emojis[last_words[-4]]
    
-    if alt_class == '⚒️' and state == '🛌Rest' and quest == 0:
+    if (alt_class == '⚒️' or alt_class == '⚗️') and state == '🛌Rest' and quest == 0:
         await client.send_message(config.CHAT_WARS, '/myshop_open')            
                 
     if quest == 1:
