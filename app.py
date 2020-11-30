@@ -44,6 +44,14 @@ settings = {
         'target': '/g_def',
         'default': '/g_def',
         'source': 'botniato'
+    },
+    'my_mobs': {
+        'status': True,
+        'send_to': 1209077540
+    },
+    'my_ambush': {
+        'status': True,
+        'send_to': config.CHAMPMOBS
     }
 }
 
@@ -150,20 +158,21 @@ async def forward_report(event):
 
 
 
-#*********** FORBIDDEN MONSTERS **************************
+############ FORBIDDEN MONSTERS ############
 
-# @client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*You met some hostile creatures*'))
-# async def monsters(event):
-#     global champ
-#     if 'ambush!' in event.message.message:
-#         logging.info('Fighting Champion')
-#         await client.forward_messages(config.CHAMPMOBS, event.message)
-#         time.sleep(2)
-#         await client.send_message(config.CHAMPMOBS, '🔥🔥🔥 help 🔥🔥🔥')
-        
-#     elif 'Forbidden' in event.message.message:
-#         logging.info('Fighting Forbidden Monsters')
-#         await client.forward_messages(config.BOTMOBS, event.message)
+# My mobs
+@client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*You met some hostile creatures*'))
+async def monsters(event):
+    if 'ambush!' in event.message.message:
+        if settings['my_ambush']['status']:
+            logging.info('Found ambush')
+            await client.forward_messages(settings['my_ambush']['send_to'], event.message)     
+            await tools.user_log(client, 'Found ambush') 
+    else:
+        if settings['my_mobs']['status']:
+            logging.info('Found Forbidden Monsters')
+            await client.forward_messages(settings['my_mobs']['send_to'], event.message)   
+            await tools.user_log(client, 'Found forbidden Monsters') 
   
 # @client.on(events.NewMessage(chats = config.CHAMPMOBS , incoming = True, pattern='.*You met some hostile creatures*'))
 # async def champion(event):
