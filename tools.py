@@ -48,7 +48,8 @@ class ChatWarsCron():
         assert m >= 0 and h >= 0
         if m >= 60:
             h += m // 60
-            m = 60 - m % 60
+            m =  m % 60
+        m = 60 - m
         mstr = str(m)
         vals = [mstr.zfill(2-len(mstr))] + [(24 + i + self.utc_delay - (h + 1))%24 for i in self.war_times]
         return '{} {},{},{} * * *'.format(*vals)
