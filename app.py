@@ -144,8 +144,9 @@ async def report():
     pattern='((.|\n)*)Your result on the battlefield:((.|\n)*)'))
 async def forward_report(event):
     if settings['report']['status']:
-        await client.forward_messages(settings['report']['send_to'], event.message)      
-        await tools.user_log(client, 'Report forwarded') 
+        if not 'Encounter' in event.message.text:
+            await client.forward_messages(settings['report']['send_to'], event.message)      
+            await tools.user_log(client, 'Report forwarded') 
 
 
 
