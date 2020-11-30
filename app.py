@@ -56,14 +56,64 @@ settings = {
 }
 
 
-############ Current Status ############ 
-status = {
-    'castle': '🥔'
-}
-
 
 ############ Generator of cron strings ############ 
 cwc = tools.ChatWarsCron(config.UTC_DELAY)
+
+
+############ STATUS ############
+# Empty status
+status = {
+    'castle': '',
+    'current_stamina': 0,
+    'max_stamina': 0,
+    'class': '',
+    'guild': '',
+    'state': ''
+}
+
+# Request an status update
+async def request_status_update():
+    await client.send_message(config.CHAT_WARS, '🏅Me')
+
+# Update the status parsing Me
+@client.on(events.NewMessage(chats=config.CHAT_WARS, incoming = True, pattern=r'Battle of the seven castles in|🌟Congratulations! New level!🌟'))
+async def program_quest_func(event):
+ 
+    # global arena, daily_arenas, quest, to_quest, endurance, endurance_max, state, alt_class, castle
+  
+    status['current_stamina'] = int(re.search(r'Stamina: (\d+)', event.raw_text).group(1))
+    status['max_stamina'] = int(re.search(r'Stamina: (\d+)/(\d+)', event.raw_text).group(2))
+    status['state'] = re.search(r'State:\n(.*)', event.raw_text).group(1)
+    lines = event.raw_text.split('\n')
+    for i, line in enumerate(lines):
+        if len(line):
+            if line[0] in ['🥔', '🦅', '🦌', '🐉', '🦈', '🐺', '🌑']:
+                status['castle'] = line[0]
+                if ']' in line:
+                    front, back = line.split(']')
+                    status['guild'] = front.split('[')[-1]
+                else:
+                    back = line[1:]
+                last_words = back.split(' ')
+                status['class'] = tools.emojis[last_words[-4]]
+
+# Retreive current status
+@client.on(events.NewMessage(chats=config.GROUP, pattern='/status'))
+async def status_all(event):
+    await request_status_update()
+    await tools.noisy_sleep(2, 1)
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")    
+    msg =  '''
+<b> Player Status:</b>\n
+🔋 Stamina: {current_stamina}/{max_stamina}
+State: {state}
+🏰Castle: {castle} Class: {class}
+--- server time: {current_time}'''.format(current_time=current_time, **status)
+    
+    await tools.user_log(client, msg)
+
 
 
 ############ SETTINGS ############
@@ -230,43 +280,6 @@ async def monsters(event):
 # mobs = ''
 # champ = 0
 # quest_status = 1
-
-status = {
-    'castle': '',
-    'current_stamina': 0,
-    'max_stamina': 0,
-    'class': '',
-    'guild': '',
-    'class': '',
-    'state': ''
-}
-
-############ STATUS UPDATE ############
-# Update the status parsing Me
-@client.on(events.NewMessage(chats=config.CHAT_WARS, incoming = True, pattern=r'Battle of the seven castles in|🌟Congratulations! New level!🌟'))
-async def program_quest_func(event):
- 
-    # global arena, daily_arenas, quest, to_quest, endurance, endurance_max, state, alt_class, castle
-  
-    status['current_stamina'] = int(re.search(r'Stamina: (\d+)', event.raw_text).group(1))
-    status['max_stamina'] = int(re.search(r'Stamina: (\d+)/(\d+)', event.raw_text).group(2))
-    status['state'] = re.search(r'State:\n(.*)', event.raw_text).group(1)
-    lines = event.raw_text.split('\n')
-    for i, line in enumerate(lines):
-        if len(line):
-            if line[0] in ['🥔', '🦅', '🦌', '🐉', '🦈', '🐺', '🌑']:
-                status['castle'] = line[0]
-                if ']' in line:
-                    front, back = line.split(']')
-                    status['guild'] = front.split('[')[-1]
-                else:
-                    back = line[1:]
-                last_words = back.split(' ')
-                status['class'] = tools.emojis[last_words[-4]]
-
-# Request an status update
-async def request_status_update():
-    await client.send_message(config.CHAT_WARS, '🏅Me')
 
 
    
@@ -571,28 +584,7 @@ async def request_status_update():
 
 
     
-#     #*********** STATUS **************************
-    
-# @client.on(events.NewMessage(chats=config.GROUP, pattern='/status'))
-# async def status_all(event):
-#     await client.send_message(config.CHAT_WARS, '🏅Me')
-#     await tools.noisy_sleep(2, 1)
-#     now = datetime.now()
-#     qstatus = tools.bool2emoji(True if quest_status == 1 else False)
-#     cstatus = tools.bool2emoji(True if champ == 1 else False)
-     
-#     current_time = now.strftime("%H:%M:%S")    
-#     msg =  '<b> Player Status:</b>\n'
-#     msg += '🔋 Stamina: {} / {}\n State: {}\n'.format(endurance, endurance_max, state) 
-#     msg += '🏰Castle: {} Class: {}\n'.format(castle, alt_class) 
-#     msg += '⛰️Quest status: {} ⚔️Champion: {}\n'.format(qstatus, cstatus) 
-#     msg += '🔥 Quests to do: {}\n'.format(to_quest) 
-#     msg += '📍 Currently: {}\n'.format(quest_place) 
-#     msg += '⏰ During: {}\n'.format(quest_daytime) 
-#     msg += '📯 Arenas Done: {}\n'.format(daily_arenas) 
-#     msg += '--- server time: {}\n'.format(current_time)
-    
-#     await tools.user_log(client, msg)
+
 
 
 async def init():
@@ -602,7 +594,7 @@ with client:
     client.start()
     client.loop.run_until_complete(init())
     client.run_until_disconnected() 
-    
+
 # if __name__ == '__main__':
 #     client.start()
 #     client.run_until_disconnected() 
