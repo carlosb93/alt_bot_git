@@ -191,6 +191,7 @@ async def monsters(event):
 
 
 
+
 # #global variables
 # stamina = 0
 # arena = 0
@@ -229,6 +230,129 @@ async def monsters(event):
 # mobs = ''
 # champ = 0
 # quest_status = 1
+
+status = {
+    'castle': '',
+    'current_stamina': 0,
+    'max_stamina': 0,
+    'class': '',
+    'guild': '',
+    'class': '',
+    'state': ''
+}
+
+############ STATUS UPDATE ############
+# Update the status parsing Me
+@client.on(events.NewMessage(chats=config.CHAT_WARS, incoming = True, pattern=r'Battle of the seven castles in|🌟Congratulations! New level!🌟'))
+async def program_quest_func(event):
+ 
+    # global arena, daily_arenas, quest, to_quest, endurance, endurance_max, state, alt_class, castle
+  
+    status['current_stamina'] = int(re.search(r'Stamina: (\d+)', event.raw_text).group(1))
+    status['max_stamina'] = int(re.search(r'Stamina: (\d+)/(\d+)', event.raw_text).group(2))
+    status['state'] = re.search(r'State:\n(.*)', event.raw_text).group(1)
+    lines = event.raw_text.split('\n')
+    for i, line in enumerate(lines):
+        if len(line):
+            if line[0] in ['🥔', '🦅', '🦌', '🐉', '🦈', '🐺', '🌑']:
+                status['castle'] = line[0]
+                if ']' in line:
+                    front, back = line.split(']')
+                    status['guild'] = front.split('[')[-1]
+                else:
+                    back = line[1:]
+                last_words = back.split(' ')
+                status['class'] = tools.emojis[last_words[-4]]
+
+# Request an status update
+async def request_status_update():
+    await client.send_message(config.CHAT_WARS, '🏅Me')
+
+
+   
+    # if alt_class == '⚒️' and state == '🛌Rest' and quest == 0:
+    #     await client.send_message(config.CHAT_WARS, '/myshop_open')            
+                
+    # if quest == 1:
+    #     logging.info('Programming quest')
+    #     me = event.message.message.split('\n')
+
+    #     stamina = '🔋Stamina: '
+    #     stamina_match = [elem for elem in me if stamina in elem]
+    #     current_stamina = int(stamina_match[0].split(' ')[1].split('/')[0])
+
+    #     if quest_daytime == 'night':
+    #         doable_quests = math.floor(105/(quest_duration+3))
+    #         range_min, range_max = (quest_duration+2)*60 +20, (quest_duration+3)*60
+    #     elif quest_daytime == 'morning':
+    #         doable_quests = math.floor(105/(quest_duration+1))
+    #         range_min, range_max = quest_duration*60 +20, (quest_duration+1)*60
+    #     elif quest_daytime == 'day':
+    #         doable_quests = math.floor(120/(quest_duration+1))
+    #         range_min, range_max = quest_duration*60 +20, (quest_duration+1)*60
+    #     else:
+    #         doable_quests = math.floor(120/(quest_duration+1))
+    #         range_min, range_max = quest_duration*60 +20, (quest_duration+1)*60
+    #     if current_stamina >= doable_quests:
+    #         cumulative_sec = 0
+    #         for i in range(0,doable_quests):
+    #             rand_seconds = random.randrange(range_min, range_max) #seconds
+    #             time.sleep(1)
+    #             await client.send_message(config.CHAT_WARS, '🗺Quests', schedule=timedelta(seconds=cumulative_sec))
+    #             cumulative_sec += rand_seconds
+                
+    #             to_quest = doable_quests
+    #             quest = 0
+            
+    #     elif doable_quests == 0:
+    #         pass
+            
+    #     else:
+    #         cumulative_sec = 0
+    #         for i in range(0,current_stamina):
+    #             rand_seconds = random.randrange(range_min, range_max) #seconds
+    #             time.sleep(1)
+    #             await client.send_message(config.CHAT_WARS, '🗺Quests', schedule=timedelta(seconds=cumulative_sec))
+    #             cumulative_sec += rand_seconds
+                
+    #             to_quest = current_stamina
+    #             quest = 0
+
+    # if arena == 1:
+    #     logging.info('Programming arenas')
+    #     arena = 0
+    #     me = event.message.message.split('\n')
+
+    #     gold = '💰'
+    #     gold_match = [elem for elem in me if gold in elem]
+    #     current_gold = int(gold_match[0].split(' ')[0][1:])
+
+    #     doable_arenas = math.floor(current_gold/5)
+        
+    #     remaining_arenas = 5 - daily_arenas
+
+    #     if remaining_arenas != 0:
+    #         if doable_arenas >= remaining_arenas:
+    #             daily_arenas += remaining_arenas
+    #             cumulative_sec = 0
+    #             for i in range(0,remaining_arenas):
+    #                 rand_seconds = random.randrange(320, 360) #seconds
+    #                 time.sleep(2)
+    #                 await client.send_message(config.CHAT_WARS, '▶️Fast fight', schedule=timedelta(seconds=cumulative_sec))
+    #                 cumulative_sec += rand_seconds
+            
+    #         elif doable_arenas == 0:
+    #             pass
+            
+    #         else:
+    #             cumulative_sec = 0
+    #             daily_arenas += doable_arenas
+    #             for i in range(0,doable_arenas):
+    #                 rand_seconds = random.randrange(320, 360) #seconds
+    #                 time.sleep(2)
+    #                 await client.send_message(config.CHAT_WARS, '▶️Fast fight', schedule=timedelta(seconds=cumulative_sec))
+    #                 cumulative_sec += rand_seconds
+
 
 
 #     #*********** config.DEPOSITED SUCCESSFULLY **************************
@@ -404,110 +528,6 @@ async def monsters(event):
 #         quest = 0
 #     await client.send_message(config.CHAT_WARS, '🏅Me')
     
-# @client.on(events.NewMessage(chats=config.CHAT_WARS, incoming = True, pattern=r'Battle of the seven castles in|🌟Congratulations! New level!🌟'))
-# async def program_quest_func(event):
- 
-#     global arena, daily_arenas, quest, to_quest, endurance, endurance_max, state, alt_class, castle
-  
-#     endurance = int(re.search(r'Stamina: (\d+)', event.raw_text).group(1))
-#     endurance_max = int(re.search(r'Stamina: (\d+)/(\d+)', event.raw_text).group(2))
-#     state = re.search(r'State:\n(.*)', event.raw_text).group(1)
-#     lines = event.raw_text.split('\n')
-#     for i, line in enumerate(lines):
-#         if len(line):
-#             if line[0] in ['🥔', '🦅', '🦌', '🐉', '🦈', '🐺', '🌑']:
-#                 castle = line[0]
-#                 status['castle'] = line[0]
-#                 if ']' in line:
-#                     front, back = line.split(']')
-#                     guild = front.split('[')[-1]
-#                 else:
-#                     back = line[1:]
-#                 last_words = back.split(' ')
-#                 alt_class = tools.emojis[last_words[-4]]
-   
-#     if alt_class == '⚒️' and state == '🛌Rest' and quest == 0:
-#         await client.send_message(config.CHAT_WARS, '/myshop_open')            
-                
-#     if quest == 1:
-#         logging.info('Programming quest')
-#         me = event.message.message.split('\n')
-
-#         stamina = '🔋Stamina: '
-#         stamina_match = [elem for elem in me if stamina in elem]
-#         current_stamina = int(stamina_match[0].split(' ')[1].split('/')[0])
-
-#         if quest_daytime == 'night':
-#             doable_quests = math.floor(105/(quest_duration+3))
-#             range_min, range_max = (quest_duration+2)*60 +20, (quest_duration+3)*60
-#         elif quest_daytime == 'morning':
-#             doable_quests = math.floor(105/(quest_duration+1))
-#             range_min, range_max = quest_duration*60 +20, (quest_duration+1)*60
-#         elif quest_daytime == 'day':
-#             doable_quests = math.floor(120/(quest_duration+1))
-#             range_min, range_max = quest_duration*60 +20, (quest_duration+1)*60
-#         else:
-#             doable_quests = math.floor(120/(quest_duration+1))
-#             range_min, range_max = quest_duration*60 +20, (quest_duration+1)*60
-#         if current_stamina >= doable_quests:
-#             cumulative_sec = 0
-#             for i in range(0,doable_quests):
-#                 rand_seconds = random.randrange(range_min, range_max) #seconds
-#                 time.sleep(1)
-#                 await client.send_message(config.CHAT_WARS, '🗺Quests', schedule=timedelta(seconds=cumulative_sec))
-#                 cumulative_sec += rand_seconds
-                
-#                 to_quest = doable_quests
-#                 quest = 0
-            
-#         elif doable_quests == 0:
-#             pass
-            
-#         else:
-#             cumulative_sec = 0
-#             for i in range(0,current_stamina):
-#                 rand_seconds = random.randrange(range_min, range_max) #seconds
-#                 time.sleep(1)
-#                 await client.send_message(config.CHAT_WARS, '🗺Quests', schedule=timedelta(seconds=cumulative_sec))
-#                 cumulative_sec += rand_seconds
-                
-#                 to_quest = current_stamina
-#                 quest = 0
-
-#     if arena == 1:
-#         logging.info('Programming arenas')
-#         arena = 0
-#         me = event.message.message.split('\n')
-
-#         gold = '💰'
-#         gold_match = [elem for elem in me if gold in elem]
-#         current_gold = int(gold_match[0].split(' ')[0][1:])
-
-#         doable_arenas = math.floor(current_gold/5)
-        
-#         remaining_arenas = 5 - daily_arenas
-
-#         if remaining_arenas != 0:
-#             if doable_arenas >= remaining_arenas:
-#                 daily_arenas += remaining_arenas
-#                 cumulative_sec = 0
-#                 for i in range(0,remaining_arenas):
-#                     rand_seconds = random.randrange(320, 360) #seconds
-#                     time.sleep(2)
-#                     await client.send_message(config.CHAT_WARS, '▶️Fast fight', schedule=timedelta(seconds=cumulative_sec))
-#                     cumulative_sec += rand_seconds
-            
-#             elif doable_arenas == 0:
-#                 pass
-            
-#             else:
-#                 cumulative_sec = 0
-#                 daily_arenas += doable_arenas
-#                 for i in range(0,doable_arenas):
-#                     rand_seconds = random.randrange(320, 360) #seconds
-#                     time.sleep(2)
-#                     await client.send_message(config.CHAT_WARS, '▶️Fast fight', schedule=timedelta(seconds=cumulative_sec))
-#                     cumulative_sec += rand_seconds
 
 
 # @client.on(events.NewMessage(chats=config.CHAT_WARS, pattern='((.|\n)*)Many things can happen in the forest((.|\n)*)'))
@@ -550,10 +570,6 @@ async def monsters(event):
 #                         await button.click()
 
 
-
-
-
-
     
 #     #*********** STATUS **************************
     
@@ -577,8 +593,17 @@ async def monsters(event):
 #     msg += '--- server time: {}\n'.format(current_time)
     
 #     await tools.user_log(client, msg)
-            
-if __name__ == '__main__':
+
+
+async def init():
+    await request_status_update()
+
+with client:
     client.start()
+    client.loop.run_until_complete(init())
     client.run_until_disconnected() 
+    
+# if __name__ == '__main__':
+#     client.start()
+#     client.run_until_disconnected() 
 
