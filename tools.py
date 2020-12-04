@@ -19,7 +19,9 @@ emojis = {
 settings_emoji = {
     'foray': '🗡',
     'report': '📜',
-    'order': '⚜️'
+    'order': '⚜️',
+    'my_mobs': '👾',
+    'my_ambush': '🐙',
 }
 
 castle_emojis = ['🥔', '🦅', '🦌', '🐉', '🦈', '🐺', '🌑']
