@@ -124,7 +124,7 @@ async def update_status(event):
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")   
     status['current_time'] = current_time
-    status['time_of_day'] = 'morning' #TODO: Update getting the good time of day
+    status['time_of_day'] = cwc.get_current_day_time(current_time)
 
 # Retreive current status
 @client.on(events.NewMessage(chats=config.GROUP, pattern='/status'))

@@ -83,3 +83,26 @@ class ChatWarsCron():
     
     def reset_time(self):
         return '30 {} * * *'.format(8 + self.utc_delay)
+    
+    def get_current_day_time(self, string):
+        hour, minute, sec = (int(chunk) for chunk in string.split(':'))
+        print(hour)
+        hour = (24 + hour - self.utc_delay + (8 - self.war_times[0])) % 24 
+        print(hour)
+        cw_day_hour = hour % 8
+        print(cw_day_hour)
+        if cw_day_hour < 2:
+            return 'morning'
+        elif cw_day_hour < 4:
+            return 'day'
+        elif cw_day_hour < 6:
+            return 'evening'
+        else:
+            return 'night'
+
+
+
+c = ChatWarsCron(1)
+
+for i in range(24):    
+    print(c.get_current_day_time('{}:57:12'.format(i)))
