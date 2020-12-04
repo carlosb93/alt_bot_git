@@ -45,6 +45,19 @@ settings = {
         'default': '/g_def',
         'source': 'botniato'
     },
+    'arena': {
+        'status': True,
+        'min_hp': 500
+    },
+    'quest': {
+        'status': True,
+        'morning': 'Swamp',
+        'day': 'Forest',
+        'evening': 'Valley',
+        'night': 'Random',
+        'min_hp': 350,
+        'fire': True
+    },
     'my_mobs': {
         'status': True,
         'send_to': 1209077540
@@ -73,7 +86,8 @@ status = {
     'current_hp': 0,
     'max_hp': 0, 
     'arenas': 0,
-    'gold': 0
+    'gold': 0,
+    'time_of_day': 'morning'
 
 }
 
@@ -83,7 +97,7 @@ async def request_status_update():
 
 # Update the status parsing Me
 @client.on(events.NewMessage(chats=config.CHAT_WARS, incoming = True, pattern=r'Battle of the seven castles in|🌟Congratulations! New level!🌟'))
-async def program_quest_func(event):
+async def update_status(event):
  
     # global arena, daily_arenas, quest, to_quest, endurance, endurance_max, state, alt_class, castle
   
@@ -107,14 +121,16 @@ async def program_quest_func(event):
             if line[0].startswith('💰'):
                 status['gold'] = int(line[1:].split()[0])
 
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")   
+    status['current_time'] = current_time
+    status['time_of_day'] = 'morning' #TODO: Update getting the good time of day
 
 # Retreive current status
 @client.on(events.NewMessage(chats=config.GROUP, pattern='/status'))
 async def status_all(event):
     await request_status_update()
     await tools.noisy_sleep(2, 1)
-    now = datetime.now()
-    current_time = now.strftime("%H:%M:%S")    
     msg =  '''
 <b> Player Status:</b>\n
 🏰Castle: {castle} 
@@ -124,9 +140,15 @@ async def status_all(event):
 ❤️ Hp: {current_hp}/{max_hp}
 📯 Arenas: {arenas}/5
 Curently: {state}
---- server time: {current_time}'''.format(current_time=current_time, **status)
+--- server time: {current_time}'''.format(**status)
     
     await tools.user_log(client, msg)
+
+
+@aiocron.crontab(cwc.reset_time())
+async def reset_stuff():
+    status['arenas'] = 0
+    await tools.user_log(client, 'Counters restarted')
 
 
 
@@ -256,6 +278,91 @@ async def monsters(event):
 #                 await client.send_message(config.CHAMPMOBS, 'ya entre no he marcado......')
 
 
+
+############ QUESTS AND ARENAS ############
+@client.on(events.NewMessage(chats=config.CHAT_WARS, pattern='((.|\n)*)Dirty air is soaked with the thick smell of blood((.|\n)*)'))
+async def clicking_arena(event): 
+    status['arenas'] = int(re.search(r'Your fights: (\d+)', event.raw_text).group(1))
+            
+
+async def go_to_arena(event):
+    # Clic the button of Arena
+    await tools.noisy_sleep(5,2)
+    buttons = await event.get_buttons()
+    for bline in buttons:
+        for button in bline:        
+            if 'Arena' in button.button.text:
+                await button.click()
+    
+    # Clic the button of Fast fight
+    await tools.noisy_sleep(5,2)
+    if status['arenas'] < 5:
+        await client.send_message(config.CHAT_WARS, '▶️Fast fight')
+        status['arenas'] += 1
+
+
+
+async def go_to_quest(place, event):
+    await tools.noisy_sleep(5,1)
+    buttons = await event.get_buttons()
+    for bline in buttons:
+        for button in bline:        
+            if place in button.button.text:
+                time.sleep(1)
+                await button.click()
+                break
+
+
+async def get_quest_place(text, tod):
+    valid = ['Swamp', 'Valley', 'Forest']
+    if settings['quest']['fire'] and '🔥' in text:
+        quests = {'Swamp': 'Swamp', 'Mountain': 'Valley', 'Forest': 'Forest'}
+        lines = text.split('\n')
+        for line in lines:
+            if line[-1] == '🔥':
+                place = line[1:].split()[0]
+                return quests[place]
+
+    elif tod in settings['quest'].keys():
+        place = settings['quest'][tod]
+        if place == 'Random':
+            return random.choice(valid)
+        elif place in valid:
+            return place
+        else:  
+            await tools.user_log(client, 'Unknown place: {} for the time: {}'.format(place, tod)) 
+    else:
+        await tools.user_log(client, 'Unknown time: {}'.format(tod)) 
+
+
+@client.on(events.NewMessage(chats=config.CHAT_WARS, pattern='((.|\n)*)Many things can happen in the forest((.|\n)*)'))
+async def clicking_quest(event): 
+    if settings['arena']['status']:
+        if status['time_of_day'] in ['morning', 'day', 'evening']:
+            if status['arenas'] < 5 and status['gold'] > 5:
+                if status['current_hp'] > settings['arena']['min_hp']:
+                    await go_to_arena(event)
+                    return
+
+    if settings['quest']['status']:
+        if status['current_stamina'] > 1:
+            if status['current_hp'] > settings['quest']['min_hp']:
+                place = await get_quest_place(text=event.message.text, tod=status['time_of_day'])
+                if place:
+                    await go_to_quest(place, event)
+            
+
+
+# This function needs to be scheduled often
+async def do_something():
+    await request_status_update()
+    await tools.noisy_sleep(5,2)
+    if status['current_stamina'] > 0 and status['current_hp'] > settings['quest']['min_hp']:
+        await client.send_message(config.CHAT_WARS, '🗺Quests')
+    elif status['arenas'] < 5 and status['current_hp'] > settings['arena']['min_hp'] and status['gold'] > 5:
+        await client.send_message(config.CHAT_WARS, '🗺Quests')
+    else:
+        pass #TODO: Stop scheduling upcoming events by some time
 
 
 
@@ -411,12 +518,7 @@ async def monsters(event):
 #     stamina = 1
 #     await client.send_message(config.CHAT_WARS, '🗺Quests')
 
-#     #*********** ARENAS **************************
-    
-# @aiocron.crontab(reset_arena_crontab)
-# async def reset_arenas():
-#     global daily_arenas
-#     daily_arenas = 0
+
     
 # @aiocron.crontab(arena_crontab)
 # async def arenas():

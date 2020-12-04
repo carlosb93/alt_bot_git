@@ -80,3 +80,6 @@ class ChatWarsCron():
 
     def night(self):
         return self.hours_after_war(6)
+    
+    def reset_time(self):
+        return '30 {} * * *'.format(8 + self.utc_delay)
