@@ -69,7 +69,12 @@ status = {
     'max_stamina': 0,
     'class': '',
     'guild': '',
-    'state': ''
+    'state': '',
+    'current_hp': 0,
+    'max_hp': 0, 
+    'arenas': 0,
+    'gold': 0
+
 }
 
 # Request an status update
@@ -84,6 +89,8 @@ async def program_quest_func(event):
   
     status['current_stamina'] = int(re.search(r'Stamina: (\d+)', event.raw_text).group(1))
     status['max_stamina'] = int(re.search(r'Stamina: (\d+)/(\d+)', event.raw_text).group(2))
+    status['current_hp'] = int(re.search(r'Hp: (\d+)', event.raw_text).group(1))
+    status['max_hp'] = int(re.search(r'Hp: (\d+)/(\d+)', event.raw_text).group(2))
     status['state'] = re.search(r'State:\n(.*)', event.raw_text).group(1)
     lines = event.raw_text.split('\n')
     for i, line in enumerate(lines):
@@ -97,6 +104,9 @@ async def program_quest_func(event):
                     back = line[1:]
                 last_words = back.split(' ')
                 status['class'] = tools.emojis[last_words[-4]]
+            if line[0].startswith('💰'):
+                status['gold'] = int(line[1:].split()[0])
+
 
 # Retreive current status
 @client.on(events.NewMessage(chats=config.GROUP, pattern='/status'))
@@ -107,9 +117,13 @@ async def status_all(event):
     current_time = now.strftime("%H:%M:%S")    
     msg =  '''
 <b> Player Status:</b>\n
+🏰Castle: {castle} 
+👨‍🏫Class: {class}
+💰 Money: {gold}
 🔋 Stamina: {current_stamina}/{max_stamina}
-State: {state}
-🏰Castle: {castle} Class: {class}
+❤️ Hp: {current_hp}/{max_hp}
+📯 Arenas: {arenas}/5
+Curently: {state}
 --- server time: {current_time}'''.format(current_time=current_time, **status)
     
     await tools.user_log(client, msg)
@@ -224,6 +238,9 @@ async def monsters(event):
             await client.forward_messages(settings['my_mobs']['send_to'], event.message)   
             await tools.user_log(client, 'Found forbidden Monsters') 
   
+
+# TODO: Add logic to hunt other people mobs
+
 # @client.on(events.NewMessage(chats = config.CHAMPMOBS , incoming = True, pattern='.*You met some hostile creatures*'))
 # async def champion(event):
 #     global mobs, champ
