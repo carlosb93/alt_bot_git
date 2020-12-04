@@ -86,11 +86,8 @@ class ChatWarsCron():
     
     def get_current_day_time(self, string):
         hour, minute, sec = (int(chunk) for chunk in string.split(':'))
-        print(hour)
         hour = (24 + hour - self.utc_delay + (8 - self.war_times[0])) % 24 
-        print(hour)
         cw_day_hour = hour % 8
-        print(cw_day_hour)
         if cw_day_hour < 2:
             return 'morning'
         elif cw_day_hour < 4:
@@ -100,9 +97,11 @@ class ChatWarsCron():
         else:
             return 'night'
 
+    def get_possible_events(self, string):
+        hour, minute, sec = (int(chunk) for chunk in string.split(':'))
+        hour = (24 + hour - self.utc_delay + (8 - self.war_times[0])) % 24 
+        cw_day_hour = hour % 8
+        cw_time = cw_day_hour % 2
 
-
-c = ChatWarsCron(1)
-
-for i in range(24):    
-    print(c.get_current_day_time('{}:57:12'.format(i)))
+        minute += 60 * cw_time
+        return int(120 - minute/10) - 1
