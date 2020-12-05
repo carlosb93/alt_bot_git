@@ -321,7 +321,7 @@ async def go_to_arena(event):
                 await button.click()
     
     # Clic the button of Fast fight
-    await tools.noisy_sleep(5,2)
+    await tools.noisy_sleep(6,3)
     if status['arenas'] < 5:
         await client.send_message(config.CHAT_WARS, '▶️Fast fight')
         status['arenas'] += 1
