@@ -388,10 +388,12 @@ async def do_something():
     if status['state'] == '🛌Rest': # TODO: Add here ... or in shop
         if status['current_stamina'] >= 0 and status['current_hp'] > settings['quest']['min_hp']:
             await client.send_message(config.CHAT_WARS, '🗺Quests')
+            return True
         elif status['arenas'] < 5 and status['current_hp'] > settings['arena']['min_hp'] and status['gold'] > 5:
             await client.send_message(config.CHAT_WARS, '🗺Quests')
+            return True
         else:
-            pass #TODO: Stop scheduling upcoming events by some time and maybe shop_open
+            return False 
 
 
 # Schedulers
@@ -409,8 +411,11 @@ async def planner(max_events, initial_sleep, first_time=False):
         await tools.noisy_sleep(60*initial_sleep, 60*(initial_sleep-1))
         print('{} events scheduled for this period'.format(total_events))
         for e in range(total_events):
-            await do_something()
-            await tools.noisy_sleep(60*8, 60*7)
+            keep_going = await do_something()
+            if keep_going:
+                await tools.noisy_sleep(60*8, 60*7)
+            else:
+                break
         # TODO: This is a great moment to open shop
 
 
