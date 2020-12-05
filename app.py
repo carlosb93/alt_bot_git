@@ -168,6 +168,52 @@ async def get_settings(event):
     await tools.user_log(client, res)
 
 
+def parse_value(string):
+    if string == 'True' or string == 'on':
+        return True
+    elif string == 'False' or string == 'off':
+        return False
+    try : 
+        string_integer = int(string)
+        return string_integer
+    except ValueError :
+        pass
+    return string
+
+
+# Enable/disable the settings
+@client.on(events.NewMessage(chats=config.GROUP, pattern='/set'))
+async def update_settings(event):
+    parsed_command = event.message.text.split()
+    if len(parsed_command) == 3:
+        if parsed_command[0] == '/set':
+            if parsed_command[1] in settings.keys():
+                sett = parsed_command[1]
+                val = parse_value(parsed_command[2])
+                if val == True: 
+                    settings[sett]['status'] = True
+                    await tools.user_log(client, 'Setting updated\n/settingsfull')
+                    return
+                elif val == False:
+                    settings[sett]['status'] = False
+                    await tools.user_log(client, 'Setting updated\n/settingsfull')
+                    return
+        await tools.user_log(client, 'Wrong syntax. Try something like:\n<code>/set foray off</code>')
+    if len(parsed_command) == 4:    
+        if parsed_command[0] == '/set':
+            if parsed_command[1] in settings.keys():
+                sett = parsed_command[1]
+                if parsed_command[2] in settings[sett].keys():
+                    subsett = parsed_command[2]
+                    val = parse_value(parsed_command[2])
+                    settings[sett][subsett] = val
+                    await tools.user_log(client, 'Setting updated\n/settingsfull')
+                    return               
+        await tools.user_log(client, 'Wrong syntax. Try something like:\n<code>/set foray pledge off</code>')
+        
+        
+
+
 ############ FORAY ############
 # Reacts to foray attempts
 @client.on(events.NewMessage(chats=config.CHAT_WARS, 
@@ -312,7 +358,7 @@ async def go_to_quest(place, event):
     for bline in buttons:
         for button in bline:        
             if place in button.button.text:
-                time.sleep(1)
+                await tools.noisy_sleep(5,1)
                 await button.click()
                 break
 
@@ -359,7 +405,6 @@ async def clicking_quest(event):
 
 # This function needs to be scheduled often
 async def do_something():
-    print('I am doing something')
     await request_status_update()
     await tools.noisy_sleep(5,2)
     if status['state'] == '🛌Rest': # TODO: Add here ... or in shop
@@ -375,14 +420,18 @@ async def do_something():
 async def planner(max_events, initial_sleep):
     await request_status_update()
     await tools.noisy_sleep(3,2)
-    total_events = 5 - status['arenas'] + status['current_stamina']
+    total_events = 0
+    if settings['arena']['status']:
+        total_events += 5 - status['arenas']
+    if settings['quest']['status']:
+        total_events += status['current_stamina']
     total_events = max(max_events, total_events)
     await tools.noisy_sleep(60*(initial_sleep+1), 60*initial_sleep)
     print('{} events schedulers for this period'.format(total_events))
     for e in range(total_events):
         await do_something()
         await tools.noisy_sleep(60*8, 60*7)
-
+    # TODO: This is a great moment to open shop
 
 
 @aiocron.crontab(cwc.morning())
