@@ -33,7 +33,8 @@ else:
 ############ Load Settings ############ 
 settings = {
     'foray': {
-        'status': True
+        'status': True,
+        'pledge': True
     },
     'report': {
         'status': True,
@@ -226,7 +227,14 @@ async def stop_foray(event):
                 await tools.noisy_sleep(120)
                 await button.click()
         await tools.user_log(client, '🗡Foray Intervene ')
-    
+
+# Pledge
+@client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*After a successful act of violence, as a brave knight you are, you felt some guilt and decided to talk with your victims*'))
+async def pledge(event):
+    await tools.noisy_sleep(40, 10)
+    await client.send_message(config.CHAT_WARS, '/pledge')
+
+
 
 ############ BATTLES ############
 # Gets order from botniato
@@ -244,6 +252,7 @@ async def ask_botniato_order(event):
         await tools.user_log(client, 'Order requested to botniato')   
 
 #TODO: Get order from squad
+
 
 # Sets the order automatically
 @aiocron.crontab(cwc.minutes_before_war(4))
@@ -431,7 +440,7 @@ async def planner(max_events, initial_sleep):
         total_events += 5 - status['arenas']
     if settings['quest']['status']:
         total_events += status['current_stamina']
-    total_events = max(max_events, total_events)
+    total_events = min(max_events, total_events)
     await tools.noisy_sleep(60*(initial_sleep+1), 60*initial_sleep)
     print('{} events scheduled for this period'.format(total_events))
     for e in range(total_events):
