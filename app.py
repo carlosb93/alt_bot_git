@@ -144,6 +144,10 @@ def parse_value(string):
         pass
     return string
 
+def save_settings():
+    filepath = os.path.join(config.DATA_FOLDER, 'settings.json')
+    with open(filepath, 'w') as f:
+        json.dump(settings, f)
 
 # Enable/disable the settings
 @client.on(events.NewMessage(chats=config.GROUP, pattern='/set'))
@@ -154,14 +158,10 @@ async def update_settings(event):
             if parsed_command[1] in settings.keys():
                 sett = parsed_command[1]
                 val = parse_value(parsed_command[2])
-                if val == True: 
-                    settings[sett]['status'] = True
+                if val == True or  val == False: 
+                    settings[sett]['status'] = val
                     await tools.user_log(client, 'Setting updated\n/settingsfull')
-                    return
-                elif val == False:
-                    settings[sett]['status'] = False
-                    await tools.user_log(client, 'Setting updated\n/settingsfull')
-                    return
+                    return save_settings()                
         await tools.user_log(client, 'Wrong syntax. Try something like:\n<code>/set foray off</code>')
     if len(parsed_command) == 4:    
         if parsed_command[0] == '/set':
@@ -172,7 +172,7 @@ async def update_settings(event):
                     val = parse_value(parsed_command[2])
                     settings[sett][subsett] = val
                     await tools.user_log(client, 'Setting updated\n/settingsfull')
-                    return               
+                    return save_settings()
         await tools.user_log(client, 'Wrong syntax. Try something like:\n<code>/set foray pledge off</code>')
         
         

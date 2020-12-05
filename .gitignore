@@ -130,8 +130,11 @@ dmypy.json
 
 # API related stuff
 *.session
+*.session-journal
+*.journal-session
 runtime.txt
 Procfile
 
-# config file
+# config files
 config.py
+*.json
