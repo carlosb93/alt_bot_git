@@ -313,7 +313,7 @@ async def clicking_arena(event):
 
 async def go_to_arena(event):
     # Clic the button of Arena
-    await tools.noisy_sleep(5,2)
+    await tools.noisy_sleep(8,5)
     buttons = await event.get_buttons()
     for bline in buttons:
         for button in bline:        
@@ -321,7 +321,7 @@ async def go_to_arena(event):
                 await button.click()
     
     # Clic the button of Fast fight
-    await tools.noisy_sleep(6,3)
+    await tools.noisy_sleep(12,7)
     if status['arenas'] < 5:
         await client.send_message(config.CHAT_WARS, '▶️Fast fight')
         status['arenas'] += 1
@@ -331,7 +331,7 @@ async def go_to_arena(event):
 
 
 async def go_to_quest(place, event):
-    await tools.noisy_sleep(5,1)
+    await tools.noisy_sleep(7,3)
     buttons = await event.get_buttons()
     for bline in buttons:
         for button in bline:        
@@ -386,7 +386,7 @@ async def do_something():
     await request_status_update()
     await tools.noisy_sleep(5,2)
     if status['state'] == '🛌Rest': # TODO: Add here ... or in shop
-        if status['current_stamina'] > 0 and status['current_hp'] > settings['quest']['min_hp']:
+        if status['current_stamina'] >= 0 and status['current_hp'] > settings['quest']['min_hp']:
             await client.send_message(config.CHAT_WARS, '🗺Quests')
         elif status['arenas'] < 5 and status['current_hp'] > settings['arena']['min_hp'] and status['gold'] > 5:
             await client.send_message(config.CHAT_WARS, '🗺Quests')
@@ -395,22 +395,23 @@ async def do_something():
 
 
 # Schedulers
-async def planner(max_events, initial_sleep):
-    await tools.noisy_sleep(120, 60)
-    await request_status_update()
-    await tools.noisy_sleep(2, 1)
-    total_events = 0
-    if settings['arena']['status']:
-        total_events += 5 - status['arenas']
-    if settings['quest']['status']:
-        total_events += status['current_stamina']
-    total_events = min(max_events, total_events)
-    await tools.noisy_sleep(60*initial_sleep, 60*(initial_sleep-1))
-    print('{} events scheduled for this period'.format(total_events))
-    for e in range(total_events):
-        await do_something()
-        await tools.noisy_sleep(60*8, 60*7)
-    # TODO: This is a great moment to open shop
+async def planner(max_events, initial_sleep, first_time=False):
+    if settings['arena']['status'] or settings['quest']['status'] or first_time:
+        await tools.noisy_sleep(120, 60)
+        await request_status_update()
+        await tools.noisy_sleep(2, 1)
+        total_events = 0
+        if settings['arena']['status']:
+            total_events += max(5 - status['arenas'], 5)
+        if settings['quest']['status']:
+            total_events += status['current_stamina']
+        total_events = min(max_events, total_events)
+        await tools.noisy_sleep(60*initial_sleep, 60*(initial_sleep-1))
+        print('{} events scheduled for this period'.format(total_events))
+        for e in range(total_events):
+            await do_something()
+            await tools.noisy_sleep(60*8, 60*7)
+        # TODO: This is a great moment to open shop
 
 
 @aiocron.crontab(cwc.morning())
@@ -464,7 +465,7 @@ async def night_planner():
 async def init():
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")  
-    await planner(cwc.get_possible_events(current_time), 3)
+    await planner(cwc.get_possible_events(current_time), 1, first_time=True)
 
 with client:
     client.start()
