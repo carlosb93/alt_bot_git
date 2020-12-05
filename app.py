@@ -326,7 +326,7 @@ async def go_to_arena(event):
         await client.send_message(config.CHAT_WARS, '▶️Fast fight')
         status['arenas'] += 1
     else:
-        await client.send_message(config.CHAT_WARS, '⬅️Back')
+        await client.send_message(config.CHAT_WARS, '/hero') #TODO: Change for a better '⬅️Back' 
 
 
 
@@ -396,15 +396,16 @@ async def do_something():
 
 # Schedulers
 async def planner(max_events, initial_sleep):
+    await tools.noisy_sleep(120, 60)
     await request_status_update()
-    await tools.noisy_sleep(3,2)
+    await tools.noisy_sleep(2, 1)
     total_events = 0
     if settings['arena']['status']:
         total_events += 5 - status['arenas']
     if settings['quest']['status']:
         total_events += status['current_stamina']
     total_events = min(max_events, total_events)
-    await tools.noisy_sleep(60*(initial_sleep+1), 60*initial_sleep)
+    await tools.noisy_sleep(60*initial_sleep, 60*(initial_sleep-1))
     print('{} events scheduled for this period'.format(total_events))
     for e in range(total_events):
         await do_something()
