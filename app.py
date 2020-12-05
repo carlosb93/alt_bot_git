@@ -291,6 +291,12 @@ async def forward_report(event):
             await tools.user_log(client, 'Report forwarded') 
 
 
+############ HIDDEN LOCATIONS ############
+
+@client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*You found hidden location*'))
+async def location(event):
+    await client.forward_messages(config.BOTNIATO, event.message) 
+    
 
 ############ FORBIDDEN MONSTERS ############
 
@@ -427,7 +433,7 @@ async def planner(max_events, initial_sleep):
         total_events += status['current_stamina']
     total_events = max(max_events, total_events)
     await tools.noisy_sleep(60*(initial_sleep+1), 60*initial_sleep)
-    print('{} events schedulers for this period'.format(total_events))
+    print('{} events scheduled for this period'.format(total_events))
     for e in range(total_events):
         await do_something()
         await tools.noisy_sleep(60*8, 60*7)
