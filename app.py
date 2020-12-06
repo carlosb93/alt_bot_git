@@ -349,7 +349,9 @@ async def get_quest_place(text, tod):
         for line in lines:
             if len(line) and line[-1] == '🔥':
                 place = line[1:].split()[0]
-                return quests[place]
+                for k in quests.keys():
+                    if str(k) in place:
+                        return quests[k]
 
     elif tod in settings['quest'].keys():
         place = settings['quest'][tod]
@@ -384,7 +386,7 @@ async def clicking_quest(event):
 # This function needs to be scheduled often
 async def do_something():
     await request_status_update()
-    await tools.noisy_sleep(8,4)
+    await tools.noisy_sleep(10,6)
     if status['state'] == '🛌Rest': # TODO: Add here ... or in shop
         if status['current_stamina'] >= 0 and status['current_hp'] > settings['quest']['min_hp']:
             await client.send_message(config.CHAT_WARS, '🗺Quests')
