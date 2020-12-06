@@ -412,13 +412,16 @@ async def planner(max_events, initial_sleep, first_time=False):
         if settings['quest']['status']:
             total_events += status['current_stamina']
         total_events = min(max_events, total_events)
-        print('{} events scheduled for this period'.format(total_events))
+        await tools.user_log(client, '{} events scheduled for this period'.format(total_events)) 
         for e in range(total_events):
+            await tools.user_log(client, 'Doing event {}'.format(e + 1)) 
             keep_going = await do_something()
             if keep_going:
                 await tools.noisy_sleep(60*8, 60*7)
             else:
+                await tools.user_log(client, 'Schedule cancelled') 
                 break
+        await tools.user_log(client, 'Schedule finished') 
         # TODO: This is a great moment to open shop
 
 
