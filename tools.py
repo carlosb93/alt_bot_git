@@ -29,7 +29,7 @@ settings_emoji = {
 castle_emojis = ['🥔', '🦅', '🦌', '🐉', '🦈', '🐺', '🌑']
 
 async def noisy_sleep(t_max, t_min=0):
-    rand_seconds = random.randrange(0, t_max)
+    rand_seconds = random.randrange(t_min, t_max)
     await asyncio.sleep(rand_seconds) 
 
 async def user_log(client, text):
