@@ -347,7 +347,7 @@ async def get_quest_place(text, tod):
         quests = {'Swamp': 'Swamp', 'Mountain': 'Valley', 'Forest': 'Forest'}
         lines = text.split('\n')
         for line in lines:
-            if line[-1] == '🔥':
+            if len(line) and line[-1] == '🔥':
                 place = line[1:].split()[0]
                 return quests[place]
 
@@ -384,7 +384,7 @@ async def clicking_quest(event):
 # This function needs to be scheduled often
 async def do_something():
     await request_status_update()
-    await tools.noisy_sleep(5,2)
+    await tools.noisy_sleep(8,4)
     if status['state'] == '🛌Rest': # TODO: Add here ... or in shop
         if status['current_stamina'] >= 0 and status['current_hp'] > settings['quest']['min_hp']:
             await client.send_message(config.CHAT_WARS, '🗺Quests')
@@ -419,6 +419,7 @@ async def planner(max_events, initial_sleep, first_time=False):
         # TODO: This is a great moment to open shop
 
 
+#TODO: Check if there is something planed for the date_time before launching planner
 @aiocron.crontab(cwc.morning())
 async def morning_planner():
     await planner(12, 12)
