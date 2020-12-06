@@ -106,4 +106,4 @@ class ChatWarsCron():
         cw_time = cw_day_hour % 2
 
         minute += 60 * cw_time
-        return int((120 - minute)/10) - 1
+        return max(int((120 - minute)/10) - 1, 0)
