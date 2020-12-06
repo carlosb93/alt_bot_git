@@ -375,7 +375,7 @@ async def clicking_quest(event):
                     return
 
     if settings['quest']['status']:
-        if status['current_stamina'] > 1:
+        if status['current_stamina'] > 0:
             if status['current_hp'] > settings['quest']['min_hp']:
                 place = await get_quest_place(text=event.message.text, tod=status['time_of_day'])
                 if place:
@@ -388,7 +388,7 @@ async def do_something():
     await request_status_update()
     await tools.noisy_sleep(10,6)
     if status['state'] == '🛌Rest': # TODO: Add here ... or in shop
-        if status['current_stamina'] >= 0 and status['current_hp'] > settings['quest']['min_hp']:
+        if status['current_stamina'] > 0 and status['current_hp'] > settings['quest']['min_hp']:
             await client.send_message(config.CHAT_WARS, '🗺Quests')
             return True
         elif status['arenas'] < 5 and status['current_hp'] > settings['arena']['min_hp'] and status['gold'] > 5:
