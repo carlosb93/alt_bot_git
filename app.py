@@ -265,7 +265,7 @@ async def forward_report(event):
 
 ############ HIDDEN LOCATIONS ############
 
-@client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*You found hidden location*'))
+@client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*You found hidden*'))
 async def location(event):
     await client.forward_messages(config.BOTNIATO, event.message) 
     
