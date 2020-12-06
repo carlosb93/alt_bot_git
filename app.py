@@ -403,16 +403,15 @@ async def do_something():
 # Schedulers
 async def planner(max_events, initial_sleep, first_time=False):
     if settings['arena']['status'] or settings['quest']['status'] or first_time:
-        await tools.noisy_sleep(120, 60)
+        await tools.noisy_sleep(60*initial_sleep, 60*(initial_sleep-1))
         await request_status_update()
-        await tools.noisy_sleep(2, 1)
+        await tools.noisy_sleep(7, 5)
         total_events = 0
         if settings['arena']['status']:
             total_events += max(5 - status['arenas'], 5)
         if settings['quest']['status']:
             total_events += status['current_stamina']
         total_events = min(max_events, total_events)
-        await tools.noisy_sleep(60*initial_sleep, 60*(initial_sleep-1))
         print('{} events scheduled for this period'.format(total_events))
         for e in range(total_events):
             keep_going = await do_something()
