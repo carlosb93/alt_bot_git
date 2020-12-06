@@ -323,8 +323,9 @@ async def go_to_arena(event):
     # Clic the button of Fast fight
     await tools.noisy_sleep(12,7)
     if status['arenas'] < 5:
-        await client.send_message(config.CHAT_WARS, '▶️Fast fight')
+        await client.send_message(config.CHAT_WARS, '▶️Fast fight') 
         status['arenas'] += 1
+        await tools.user_log(client, 'Doing arena {}'.format(status['arenas'])) 
     else:
         await client.send_message(config.CHAT_WARS, '/hero') #TODO: Change for a better '⬅️Back' 
 
@@ -338,6 +339,7 @@ async def go_to_quest(place, event):
             if place in button.button.text:
                 await tools.noisy_sleep(5,1)
                 await button.click()
+                await tools.user_log(client, 'Going quest to {}'.format(place)) 
                 break
 
 
