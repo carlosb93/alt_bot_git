@@ -59,10 +59,10 @@ validator = {
         }, 
     "quest": {
         "status": [True, False], 
-        "morning": ["Random", "Swamp", "Forest", "Valley", "Foray"], 
-        "day": ["Random", "Swamp", "Forest", "Valley", "Foray"], 
-        "evening": ["Random", "Swamp", "Forest", "Valley", "Foray"], 
-        "night": ["Random", "Swamp", "Forest", "Valley", "Foray"], 
+        "morning": ["Random", "Swamp", "Forest", "Valley", "Foray", None], 
+        "day": ["Random", "Swamp", "Forest", "Valley", "Foray", None], 
+        "evening": ["Random", "Swamp", "Forest", "Valley", "Foray", None], 
+        "night": ["Random", "Swamp", "Forest", "Valley", "Foray", None], 
         "min_hp": "int",
          "fire": [True, False]
          }, 

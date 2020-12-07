@@ -147,6 +147,8 @@ def parse_value(string):
         return True
     elif string == 'False' or string == 'off':
         return False
+    elif string == 'None':
+        return None
     try : 
         string_integer = int(string)
         return string_integer
