@@ -117,6 +117,16 @@ async def reset_stuff():
     await tools.user_log(client, 'Counters restarted')
 
 
+############ HELP ############
+# Show current commands
+@client.on(events.NewMessage(chats=config.GROUP, pattern='/help'))
+async def help(event):
+    res = '<b>Commands available:</b>\n\n'
+    res += '/settings <i>Show your current configuration</i>\n'
+    res += '/settingsfull <i>Show a detailed configuration</i>\n'
+    res += '/set <i>Allows you to modify your settings</i>\n'
+    await tools.user_log(client, res)
+
 
 ############ SETTINGS ############
 # Retreive current user settings
@@ -169,10 +179,11 @@ async def update_settings(event):
                 sett = parsed_command[1]
                 if parsed_command[2] in settings[sett].keys():
                     subsett = parsed_command[2]
-                    val = parse_value(parsed_command[2])
-                    settings[sett][subsett] = val
-                    await tools.user_log(client, 'Setting updated\n/settingsfull')
-                    return save_settings()
+                    val = parse_value(parsed_command[3])
+                    if tools.validate(sett, subsett, val):
+                        settings[sett][subsett] = val
+                        await tools.user_log(client, 'Setting updated\n/settingsfull')
+                        return save_settings()
         await tools.user_log(client, 'Wrong syntax. Try something like:\n<code>/set foray pledge off</code>')
         
         

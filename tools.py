@@ -39,6 +39,10 @@ def bool2emoji(boolean):
     return '✔️' if boolean else '❌'
 
 
+#TODO: Validete the setting before updating
+def validate(sett, subsett, val):
+    return True
+    
 class ChatWarsCron():
     def __init__(self, server_utc):
         self.utc_delay = server_utc
