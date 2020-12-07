@@ -457,22 +457,25 @@ async def planner(max_events, initial_sleep, first_time=False):
         # TODO: This is a great moment to open shop
 
 
-#TODO: Check if there is something planed for the date_time before launching planner
 @aiocron.crontab(cwc.morning())
 async def morning_planner():
-    await planner(12, 12)
+    if settings['quest']['morning']:
+        await planner(12, 12)
     
 @aiocron.crontab(cwc.day())
 async def day_planner():
-    await planner(12, 3)
+    if settings['quest']['day']:
+        await planner(12, 3)
     
 @aiocron.crontab(cwc.evening())
 async def evening_planner():
-    await planner(12, 3)
+    if settings['quest']['evening']:
+        await planner(12, 3)
     
 @aiocron.crontab(cwc.night())
 async def night_planner():
-    await planner(10, 3)
+    if settings['quest']['night']:
+        await planner(12, 3)
    
 
 #TODO: Do something with this:
