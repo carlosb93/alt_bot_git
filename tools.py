@@ -39,10 +39,77 @@ def bool2emoji(boolean):
     return '✔️' if boolean else '❌'
 
 
-#TODO: Validete the setting before updating
+validator = {
+    "foray": {
+        "status": [True, False], 
+        "pledge": [True, False]
+        }, 
+    "report": {
+        "status": [True, False], 
+        "send_to": "int"
+        }, 
+    "order": {"status": [True, False], 
+        "target": "order", 
+        "default": "order", 
+        "source": ["botniato", "default"]
+    }, 
+    "arena": {
+        "status": [True, False], 
+        "min_hp": "int"
+        }, 
+    "quest": {
+        "status": [True, False], 
+        "morning": ["Random", "Swamp", "Forest", "Valley", "Foray"], 
+        "day": ["Random", "Swamp", "Forest", "Valley", "Foray"], 
+        "evening": ["Random", "Swamp", "Forest", "Valley", "Foray"], 
+        "night": ["Random", "Swamp", "Forest", "Valley", "Foray"], 
+        "min_hp": "int",
+         "fire": [True, False]
+         }, 
+    "my_mobs": {
+        "status": [True, False], 
+        "send_to": "int"
+        }, 
+    "my_ambush": {
+        "status": [True, False], 
+        "send_to": "int"
+        }
+    }
+
+
+
+def special_validator(method, val):
+    if method == "int":
+        if type(val) is int:
+            return True, None
+        else:
+            return False, ["Integer numbers"]
+    if method == "order":
+        if val in castle_emojis:
+            return True, None
+        elif val.startswith('/ga_def'):
+            return True, None
+        elif val.startswith('/ga_atk'):
+            return True, None
+        elif val == '/g_def':
+            return True, None
+        elif val.startswith('/g_atk'):
+            return True, None
+        else:
+            return False, castle_emojis + ['/ga_def_xxx', '/ga_atk_xxx', '/g_def', '/g_atk TAG']
+
+
 def validate(sett, subsett, val):
-    return True
-    
+    values = validator[sett][subsett]
+    if type(values) is list:
+        if val in values:
+            return True, None
+        else:
+            return False, values
+    elif type(values) is str:
+        return special_validator(values, val)
+    return False, ""
+
 class ChatWarsCron():
     def __init__(self, server_utc):
         self.utc_delay = server_utc

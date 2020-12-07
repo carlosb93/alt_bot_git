@@ -163,30 +163,48 @@ def save_settings():
 @client.on(events.NewMessage(chats=config.GROUP, pattern='/set'))
 async def update_settings(event):
     parsed_command = event.message.text.split()
-    if len(parsed_command) == 3:
-        if parsed_command[0] == '/set':
-            if parsed_command[1] in settings.keys():
-                sett = parsed_command[1]
+    if parsed_command[0] == '/set':
+        if len(parsed_command) == 3:
+            sett = parsed_command[1]
+            if sett in settings.keys():
                 val = parse_value(parsed_command[2])
-                if val == True or  val == False: 
+                status, values = tools.validate(sett, 'status', val)
+                if status: 
                     settings[sett]['status'] = val
                     await tools.user_log(client, 'Setting updated\n/settingsfull')
-                    return save_settings()                
-        await tools.user_log(client, 'Wrong syntax. Try something like:\n<code>/set foray off</code>')
-    if len(parsed_command) == 4:    
-        if parsed_command[0] == '/set':
-            if parsed_command[1] in settings.keys():
-                sett = parsed_command[1]
-                if parsed_command[2] in settings[sett].keys():
-                    subsett = parsed_command[2]
+                    return save_settings()
+                else:
+                    ret = '<b>Wrong Syntax</b>\n\n Command:\n/set {} <code>param</code>\n'.format(sett) 
+                    ret += 'acepts only <code>param</code> within:\n✔️True\n✔️False\n✔️on\n✔️off' 
+                    return await tools.user_log(client, ret)    
+            else:
+                return await tools.user_log(client, "Unknown setting {}\nType /settings to see all available ones".format(sett))           
+            
+        elif len(parsed_command) == 4:    
+            sett = parsed_command[1]
+            if sett in settings.keys():
+                subsett = parsed_command[2]
+                if subsett in settings[sett].keys():
                     val = parse_value(parsed_command[3])
-                    if tools.validate(sett, subsett, val):
+                    status, values = tools.validate(sett, subsett, val)
+                    if status:
                         settings[sett][subsett] = val
                         await tools.user_log(client, 'Setting updated\n/settingsfull')
                         return save_settings()
-        await tools.user_log(client, 'Wrong syntax. Try something like:\n<code>/set foray pledge off</code>')
-        
-        
+                    else:
+                        ret = '<b>Wrong Syntax</b>\n\n Command:\n/set {} {} <code>param</code>\n'.format(sett, subsett)
+                        ret += 'acepts only <code>param</code> within:\n'
+                        for v in values:
+                            ret += '✔️{}\n'.format(v)
+                        return await tools.user_log(client, ret)
+                else:
+                    return await tools.user_log(client, "Unknown subsetting <code>{}</code> for setting {}\nType /settingsfull to see all available ones".format(subsett, sett))
+            else:
+                return await tools.user_log(client, "Unknown setting {}\nType /settings to see all available ones".format(sett))
+            
+        else:
+            await tools.user_log(client, 'Wrong syntax. Try something like:\n<code>/set foray off</code>')    
+            
 
 
 ############ FORAY ############
@@ -218,7 +236,7 @@ async def get_botniato_order(event):
         settings['order']['target'] = '/ga_' + event.message.text.split('url?url=/ga_')[1].split()[0].split(')')[0]
         await tools.user_log(client, 'Order saved from botniato\n{}'.format(settings['order']['target']))
         return save_settings()
-        
+
 # Requests order from botniato
 @client.on(events.NewMessage(chats=config.BOTNIATO, pattern='((.|\n)*)Check the ⚜️ Order button((.|\n)*)'))
 async def ask_botniato_order(event):
