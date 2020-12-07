@@ -217,7 +217,8 @@ async def get_botniato_order(event):
     if settings['order']['status'] and settings['order']['source'] == 'botniato':
         settings['order']['target'] = '/ga_' + event.message.text.split('url?url=/ga_')[1].split()[0].split(')')[0]
         await tools.user_log(client, 'Order saved from botniato\n{}'.format(settings['order']['target']))
-
+        return save_settings()
+        
 # Requests order from botniato
 @client.on(events.NewMessage(chats=config.BOTNIATO, pattern='((.|\n)*)Check the ⚜️ Order button((.|\n)*)'))
 async def ask_botniato_order(event):
