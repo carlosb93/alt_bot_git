@@ -144,6 +144,19 @@ all_settings = {
             }
         }    
     },
+    "auction": {
+        "emoji": '🛎',
+        "subsetts": {
+            "status": {
+                "validator": [True, False],
+                "default": False
+            }, 
+            "from_group": {
+                "validator": "int",
+                "default": 1209424945
+            }
+        }    
+    },
     "my_shop": {
         "emoji": '⚒️',
         "subsetts": {

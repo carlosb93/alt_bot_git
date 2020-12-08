@@ -149,52 +149,52 @@ def parse_monsters(text):
 
 
 
-# tiers = {
-#     't2Armor': ['Order Armor','Hunter Armor','Clarity Robe'],#2
-#     't3helmet': ['Crusader Helmet','Crusader Gauntlets','Royal Helmet','Ghost Helmet','Lion Helmet','Divine Circlet'],#2
-#     't4': ['Council Boots','Griffin Boots','Celestial Boots','Council Gauntlets','Council Shield','Griffin Gloves','Celestial Bracers' ,'Griffin Knife'],#2
-#     't4Helmet': ['Council Helmet','Griffin Helmet','Celestial Helmet','Poniard'],#3
-#     't5': ['Manticore','Overseer','Discarnate'],#4
-# }
+tiers = {
+    't2Armor': ['Order Armor','Hunter Armor','Clarity Robe'],#2
+    't3helmet': ['Crusader Helmet','Crusader Gauntlets','Royal Helmet','Ghost Helmet','Lion Helmet','Divine Circlet'],#2
+    't4': ['Council Boots','Griffin Boots','Celestial Boots','Council Gauntlets','Council Shield','Griffin Gloves','Celestial Bracers' ,'Griffin Knife'],#2
+    't4Helmet': ['Council Helmet','Griffin Helmet','Celestial Helmet','Poniard'],#3
+    't5': ['Manticore','Overseer','Discarnate'],#4
+}
 
-# def parse_lot(text):
-#     bet = ''
-#     quality = 'Common'
-#     precio = '0'
-#     autg = ''
+def parse_lot(text):
+    bet = ''
+    quality = 'Common'
+    precio = '0'
+    autg = ''
     
-#     lines = text.split('\n')
-#     bet_link = lines[-1]
-#     for item in lines:
-#         if 'Quality: ' in item:
-#             quality = item.split('Quality: ')[1]
+    lines = text.split('\n')
+    bet_link = lines[-1]
+    for item in lines:
+        if 'Quality: ' in item:
+            quality = item.split('Quality: ')[1]
             
-#         if '🛡' in item or '⚔️' in item:
-#             geara = item.split(': ')[1]
-#             if '⚡️' in geara:
-#                 gear = geara.split(' ')[1]
-#                 gear2 = geara.split(' ')[2]
-#             else:
-#                 gear = geara.split(' ')[0]
-#                 gear2 = geara.split(' ')[1]
+        if '🛡' in item or '⚔️' in item:
+            geara = item.split(': ')[1]
+            if '⚡️' in geara:
+                gear = geara.split(' ')[1]
+                gear2 = geara.split(' ')[2]
+            else:
+                gear = geara.split(' ')[0]
+                gear2 = geara.split(' ')[1]
                 
-#             autg = '{} {}'.format(gear,gear2)
+            autg = '{} {}'.format(gear,gear2)
             
-#             if autg in tiers['t2Armor']:
-#                 precio = '2'
-#             if autg == 'Hunter dagger':
-#                 precio = '1'
-#             if autg in tiers['t3helmet']:
-#                 precio = '2'
-#             if autg in tiers['t4']:
-#                 precio = '2'
-#             if autg in tiers['t4Helmet']:
-#                 precio = '3'
-#             if autg in tiers['t5']:
-#                 precio = '4'
+            if autg in tiers['t2Armor']:
+                precio = '2'
+            if autg == 'Hunter dagger':
+                precio = '1'
+            if autg in tiers['t3helmet']:
+                precio = '2'
+            if autg in tiers['t4']:
+                precio = '2'
+            if autg in tiers['t4Helmet']:
+                precio = '3'
+            if autg in tiers['t5']:
+                precio = '4'
                 
-#     if precio == '0':
-#         bet = '{}'.format(bet_link)
-#     else:
-#         bet = '{}_{}'.format(bet_link,precio)
-#     return {"bet_link": bet, "quality": quality, "precio": precio, "gear": autg }
+    if precio == '0':
+        bet = '{}'.format(bet_link)
+    else:
+        bet = '{}_{}'.format(bet_link,precio)
+    return {"bet_link": bet, "quality": quality, "precio": precio, "gear": autg }

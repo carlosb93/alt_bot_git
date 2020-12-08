@@ -224,6 +224,13 @@ async def open_shop():
     if  status['state'] == '🛌Rest' and my_settings['my_shop']['status'] == True:
         await tools.noisy_sleep(3)
         await client.send_message(config.CHAT_WARS, '/myshop_open') 
+        
+# # open shop after battle
+# @aiocron.crontab(cwc.minutes_after_war(10))
+# async def openshop():
+#     if status['state'] == '🛌Rest' and settings['quest']['status'] == True and settings['my_shop']['status'] == True:
+#         await tools.noisy_sleep(3)
+#         await client.send_message(config.CHAT_WARS, '/myshop_open')
 
 ############ FORAY ############
 # Reacts to foray attempts
@@ -336,13 +343,13 @@ async def monsters(event):
   
 
 # Hunting other people mobs
-@client.on(events.NewMessage(chats = config.CHAMPMOBS , incoming = True, pattern='.*You met some hostile creatures*'))
+@client.on(events.NewMessage(chats = [my_settings['get_mobs']['from_group'], my_settings['get_ambush']['from_group']], incoming = True, pattern='.*You met some hostile creatures*'))
 async def champion(event):
     valid = ['ya entre no he marcado......','toy','se fue','next']
     if my_settings['get_mobs']['status'] and status['current_hp'] > my_settings['arena']['min_hp']:
         
         ambush = tools.parse_monsters(event.raw_text)
-        if 'ambush!' in event.message.message and my_settings['get_mobs']['status']:
+        if 'ambush!' in event.message.message and my_settings['get_ambush']['status']:
             
             min_level=ambush['level']-10
             max_level=ambush['level']+10
@@ -357,7 +364,7 @@ async def champion(event):
                     await client.send_message(config.CHAT_WARS, event.message.message)
                     await tools.noisy_sleep(5)
                     msg = random.choice(valid)
-                    await client.send_message(config.CHAMPMOBS, msg)
+                    await client.send_message(my_settings['get_ambush']['from_group'], msg)
                 else:
                     if ambush['level'] < int(status['level']):
                         status['mobsmsg'] = event.message.message
@@ -365,7 +372,7 @@ async def champion(event):
                         await client.send_message(config.CHAT_WARS, event.message.message)
                         await tools.noisy_sleep(5)
                         msg = random.choice(valid)
-                        await client.send_message(config.CHAMPMOBS, msg)
+                        await client.send_message(my_settings['get_ambush']['from_group'], msg)
         else:
             
             min_level=ambush['level']-10
@@ -380,7 +387,7 @@ async def champion(event):
                     await client.send_message(config.CHAT_WARS, ambush['link'])
                     await tools.noisy_sleep(5)
                     msg = random.choice(valid)
-                    await client.send_message(config.CHAMPMOBS, msg)
+                    await client.send_message(my_settings['get_mobs']['from_group'], msg)
 
 
 ############ QUESTS AND ARENAS ############
@@ -460,7 +467,20 @@ async def clicking_quest(event):
                 place = await get_quest_place(text=event.message.text, tod=status['time_of_day'])
                 if place:
                     await go_to_quest(place, event)
-            
+                    
+                    
+#*********** AUCTION **************************            
+@client.on(events.NewMessage(chats = my_settings['auction']['from_group'] , incoming = True, pattern='.*Lot *'))
+async def auction_check(event):
+    if my_settings['auction']['status']:
+        if 'recipe' in event.message.message or 'part' in event.message.message or 'Mithril' in event.message.message or 'piece' in event.message.message or 'blade' in event.message.message or 'shaft' in event.message.message or 'shard' in event.message.message or 'head' in event.message.message or 'fragment' in event.message.message or 'Scroll' in event.message.message or 'Storm' in event.message.message:
+            pass
+        else:
+            parse_lot = tools.parse_lot(event.raw_text)
+            if parse_lot['quality'] == 'Common':
+                msg = parse_lot['bet_link']
+                await client.send_message(config.CHAT_WARS, msg)
+                await tools.user_log(client, '{}\n{}'.format(parse_lot['gear'], parse_lot['bet_link']))            
 
 
 # This function needs to be scheduled often
@@ -526,13 +546,8 @@ async def night_planner():
    
 
 #TODO: Do something with this:
- 
-    # if alt_class == '⚒️' and state == '🛌Rest' and quest == 0:
-    #     await client.send_message(config.CHAT_WARS, '/myshop_open')            
-         
 
 #     #*********** config.DEPOSITED SUCCESSFULLY **************************
-
 #     # @client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*config.DEPOSITed successfully.*'))
 #     # async def config.DEPOSITs(event):
 #     # 	print('config.DEPOSITing')
@@ -540,15 +555,7 @@ async def night_planner():
 #     # 	await client.forward_messages(config.DEPOSIT, event.message)
 
 
-#     #*********** Open shop **************************
-# @aiocron.crontab(shop_crontab)
-# async def openshop():
-#     global alt_class
-#     if alt_class == '⚒️':
-#         await client.send_message(config.CHAT_WARS, '/myshop_open')
- 
 #     #*********** STAMINA RESTORED **************************
-
 # @client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*Stamina restored*'))
 # async def stamina_restored(event):
 #     global stamina
