@@ -138,7 +138,7 @@ def parse_monsters(text):
     for i, l in enumerate(description):
         if 'lvl.' in l:
             levels.append(int(l.split(' ')[-1][4:]))
-            emoji = find_emoji(l)
+            emoji = find_emoji(l) #TODO: This function does not exists
             if l[0].isdigit():
                 description[i] = description[i][:4] + emoji + description[i][4:]
             else:
