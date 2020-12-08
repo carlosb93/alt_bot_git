@@ -46,6 +46,19 @@ all_settings = {
             }
         }    
     },
+    "sleep": {
+        "emoji": '💤',
+        "subsetts": {
+            "status": {
+                "validator": [True, False],
+                "default": False
+            }, 
+            "third": {
+                "validator": [1, 2, 3],
+                "default": 1
+            }
+        }    
+    },
     "arena": {
         "emoji": '📯',
         "subsetts": {

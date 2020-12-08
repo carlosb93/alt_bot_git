@@ -121,6 +121,12 @@ class ChatWarsCron():
         else:
             return 'night'
 
+    def get_current_day_third(self, string):
+        hour, minute, sec = (int(chunk) for chunk in string.split(':'))
+        hour = (24 + hour - self.utc_delay + (8 - self.war_times[0])) % 24
+        cw_day_third = hour // 8 
+        return cw_day_third + 1
+       
     def get_possible_events(self, string):
         hour, minute, sec = (int(chunk) for chunk in string.split(':'))
         hour = (24 + hour - self.utc_delay + (8 - self.war_times[0])) % 24 
@@ -147,7 +153,10 @@ def parse_monsters(text):
     level = sum(levels)/len(levels)
     return {"link": link, "description": description, "level": level}
 
-
+# c = ChatWarsCron(1)
+# for i in range(24):
+#     j = c.get_current_day_third('{}:10:30'.format(i))
+#     print(i,j)
 
 # tiers = {
 #     't2Armor': ['Order Armor','Hunter Armor','Clarity Robe'],#2

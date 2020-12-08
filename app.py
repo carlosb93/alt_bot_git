@@ -344,6 +344,7 @@ async def mobs_from_group(event):
         parsed_mobs = tools.parse_monsters(event.raw_text)
         await tools.noisy_sleep(2,1)
 
+        # TODO: Check if sleep mode is active
         if status['current_stamina'] > 0 and status['state'] == '🛌Rest': # TODO: Add here ... or in shop
             
             valid = ['ya entre no he marcado......','toy','se fue','next']
@@ -512,23 +513,45 @@ async def planner(max_events, initial_sleep, first_time=False):
         await tools.noisy_sleep(7,3)
         await open_shop()
 
+def check_third_of_day():
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    return cwc.get_current_day_third(current_time)
+
+
 @aiocron.crontab(cwc.morning())
 async def morning_planner():
+    if my_settings['sleep']['status']:
+        third = check_third_of_day()
+        if third == my_settings['sleep']['third']:
+            return
     if my_settings['quest']['morning']:
         await planner(12, 12)
     
 @aiocron.crontab(cwc.day())
 async def day_planner():
+    if my_settings['sleep']['status']:
+        third = check_third_of_day()
+        if third == my_settings['sleep']['third']:
+            return
     if my_settings['quest']['day']:
         await planner(12, 3)
     
 @aiocron.crontab(cwc.evening())
 async def evening_planner():
+    if my_settings['sleep']['status']:
+        third = check_third_of_day()
+        if third == my_settings['sleep']['third']:
+            return
     if my_settings['quest']['evening']:
         await planner(12, 3)
     
 @aiocron.crontab(cwc.night())
 async def night_planner():
+    if my_settings['sleep']['status']:
+        third = check_third_of_day()
+        if third == my_settings['sleep']['third']:
+            return
     if my_settings['quest']['night']:
         await planner(12, 3)
    
