@@ -1,1 +1,16 @@
-{"castle": "", "current_stamina": 0, "max_stamina": 0, "class": "", "guild": "", "state": "", "current_hp": 0, "max_hp": 0, "arenas": 0, "gold": 0, "current_time": "00:00:00", "time_of_day": "morning", "level": 0, "mobsmsg": ""}
+{
+    "castle": "",
+    "current_stamina": 0,
+    "max_stamina": 0,
+    "class": "",
+    "guild": "",
+    "state": "",
+    "current_hp": 0,
+    "max_hp": 0,
+    "arenas": 0,
+    "gold": 0,
+    "current_time": "00:00:00",
+    "time_of_day": "morning",
+    "level": 0,
+    "mobsmsg": ""
+}

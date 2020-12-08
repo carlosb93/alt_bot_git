@@ -11,6 +11,7 @@ import os
 import json
 
 import tools
+from settings import all_settings
 import config
 
 logging.basicConfig(format='[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s', level=logging.WARNING)
@@ -32,14 +33,28 @@ else:
 
 
 ############ Load Stuff ############ 
+def save_settings():
+    filepath = os.path.join(config.DATA_FOLDER, 'settings.json')
+    with open(filepath, 'w') as f:
+        json.dump(my_settings, f)
+
 jsons = os.listdir(config.DATA_FOLDER)
 # Load settings
 if 'settings.json' in jsons:
-    datafile = os.path.join(config.DATA_FOLDER, 'settings.json')        
+    datafile = os.path.join(config.DATA_FOLDER, 'settings.json')         
+    with open(datafile) as data_file:
+        my_settings = json.load(data_file)  
 else:
-    datafile = os.path.join(config.DATA_FOLDER, 'settings_default.json')  
-with open(datafile) as data_file:
-    settings = json.load(data_file)  
+    my_settings = {}
+
+for sett in all_settings.keys():
+    if not sett in my_settings.keys():
+        my_settings[sett] = {}
+    for subsett in all_settings[sett]['subsetts'].keys():
+        if not subsett in my_settings[sett].keys():
+            my_settings[sett][subsett] = all_settings[sett]['subsetts'][subsett]['default']
+save_settings()
+
 
 # Load Status
 datafile = os.path.join(config.DATA_FOLDER, 'status_default.json') 
@@ -134,12 +149,12 @@ async def help(event):
 @client.on(events.NewMessage(chats=[config.GROUP,config.MAIN_ID], pattern='/settings'))
 async def get_settings(event):
     res = '<b>User settings:</b>\n\n'
-    for s in settings:
-        res += "{} {}{}\n".format(tools.bool2emoji(settings[s]['status']),  tools.settings_emoji[s], s)
+    for s in my_settings:
+        res += "{} {}{}\n".format(tools.bool2emoji(my_settings[s]['status']),  all_settings[s]['emoji'], s)
         if event.message.text == '/settingsfull':
-            for k in settings[s].keys():
+            for k in my_settings[s].keys():
                 if k != 'status':
-                    res += "    {}: {}\n".format(k, settings[s][k])
+                    res += "    {}: {}\n".format(k, my_settings[s][k])
     await tools.user_log(client, res)
 
 
@@ -157,10 +172,6 @@ def parse_value(string):
         pass
     return string
 
-def save_settings():
-    filepath = os.path.join(config.DATA_FOLDER, 'settings.json')
-    with open(filepath, 'w') as f:
-        json.dump(settings, f)
 
 # Enable/disable the settings
 @client.on(events.NewMessage(chats=[config.GROUP,config.MAIN_ID], pattern='/set'))
@@ -169,11 +180,11 @@ async def update_settings(event):
     if parsed_command[0] == '/set':
         if len(parsed_command) == 3:
             sett = parsed_command[1]
-            if sett in settings.keys():
+            if sett in my_settings.keys():
                 val = parse_value(parsed_command[2])
                 status, values = tools.validate(sett, 'status', val)
                 if status: 
-                    settings[sett]['status'] = val
+                    my_settings[sett]['status'] = val
                     await tools.user_log(client, 'Setting updated\n/settingsfull')
                     return save_settings()
                 else:
@@ -185,13 +196,13 @@ async def update_settings(event):
             
         elif len(parsed_command) == 4:    
             sett = parsed_command[1]
-            if sett in settings.keys():
+            if sett in my_settings.keys():
                 subsett = parsed_command[2]
-                if subsett in settings[sett].keys():
+                if subsett in my_settings[sett].keys():
                     val = parse_value(parsed_command[3])
                     status, values = tools.validate(sett, subsett, val)
                     if status:
-                        settings[sett][subsett] = val
+                        my_settings[sett][subsett] = val
                         await tools.user_log(client, 'Setting updated\n/settingsfull')
                         return save_settings()
                     else:
@@ -210,7 +221,7 @@ async def update_settings(event):
             
 ############ SHOP #############
 async def open_shop():
-    if  status['state'] == '🛌Rest' and settings['my_shop']['status'] == True:
+    if  status['state'] == '🛌Rest' and my_settings['my_shop']['status'] == True:
         await tools.noisy_sleep(3)
         await client.send_message(config.CHAT_WARS, '/myshop_open') 
 
@@ -219,7 +230,7 @@ async def open_shop():
 @client.on(events.NewMessage(chats=config.CHAT_WARS, 
     pattern='((.|\n)*)You were strolling around on your horse when you noticed((.|\n)*)'))
 async def stop_foray(event):
-    if settings['foray']['status']:
+    if my_settings['foray']['status']:
         buttons = await event.get_buttons()
         for bline in buttons:
             for button in bline:
@@ -230,8 +241,9 @@ async def stop_foray(event):
 # Pledge
 @client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*After a successful act of violence, as a brave knight you are, you felt some guilt and decided to talk with your victims*'))
 async def pledge(event):
-    await tools.noisy_sleep(40, 10)
-    await client.send_message(config.CHAT_WARS, '/pledge')
+    if my_settings['foray']['status'] and my_settings['foray']['pledge']:
+        await tools.noisy_sleep(40, 10)
+        await client.send_message(config.CHAT_WARS, '/pledge')
 
 
 
@@ -239,15 +251,15 @@ async def pledge(event):
 # Gets order from botniato
 @client.on(events.NewMessage(chats=config.BOTNIATO, pattern='.*Orders for next battle*'))
 async def get_botniato_order(event):
-    if settings['order']['status'] and settings['order']['source'] == 'botniato':
-        settings['order']['target'] = '/ga_' + event.message.text.split('url?url=/ga_')[1].split()[0].split(')')[0]
-        await tools.user_log(client, 'Order saved from botniato\n{}'.format(settings['order']['target']))
+    if my_settings['order']['status'] and my_settings['order']['source'] == 'botniato':
+        my_settings['order']['target'] = '/ga_' + event.message.text.split('url?url=/ga_')[1].split()[0].split(')')[0]
+        await tools.user_log(client, 'Order saved from botniato\n{}'.format(my_settings['order']['target']))
         return save_settings()
 
 # Requests order from botniato
 @client.on(events.NewMessage(chats=config.BOTNIATO, pattern='((.|\n)*)Check the ⚜️ Order button((.|\n)*)'))
 async def ask_botniato_order(event):
-    if settings['order']['status'] and settings['order']['source'] == 'botniato':
+    if my_settings['order']['status'] and my_settings['order']['source'] == 'botniato':
         await client.send_message(config.BOTNIATO, '⚜️ Order')
         await tools.user_log(client, 'Order requested to botniato')   
 
@@ -256,9 +268,9 @@ async def ask_botniato_order(event):
 # Sets the order automatically
 @aiocron.crontab(cwc.minutes_before_war(4))
 async def set_order():
-    if settings['order']['status']:
+    if my_settings['order']['status']:
         await tools.noisy_sleep(60)
-        target = settings['order']['target']
+        target = my_settings['order']['target']
         # Castle Orders
         if target in tools.castle_emojis:
             if target != status['castle']:
@@ -275,7 +287,7 @@ async def set_order():
             await client.send_message(config.CHAT_WARS, target) 
         # Default Orders
         else:
-            await client.send_message(config.CHAT_WARS, settings['order']['default'])   
+            await client.send_message(config.CHAT_WARS, my_settings['order']['default'])   
         
         await tools.user_log(client, 'Order set!') 
 
@@ -284,7 +296,7 @@ async def set_order():
 # Requests the report to cw
 @aiocron.crontab(cwc.minutes_after_war(9))
 async def report():
-    if settings['report']['status']:
+    if my_settings['report']['status']:
         await tools.noisy_sleep(60)
         await client.send_message(config.CHAT_WARS, '/report')
         await tools.user_log(client, 'Report requested') 
@@ -293,9 +305,9 @@ async def report():
 @client.on(events.NewMessage(chats=config.CHAT_WARS, 
     pattern='((.|\n)*)Your result on the battlefield:((.|\n)*)'))
 async def forward_report(event):
-    if settings['report']['status']:
+    if my_settings['report']['status']:
         if not 'Encounter' in event.message.text:
-            await client.forward_messages(settings['report']['send_to'], event.message)      
+            await client.forward_messages(my_settings['report']['send_to'], event.message)      
             await tools.user_log(client, 'Report forwarded') 
 
 
@@ -312,14 +324,14 @@ async def location(event):
 @client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*You met some hostile creatures*'))
 async def monsters(event):
     if 'ambush!' in event.message.message:
-        if settings['my_ambush']['status']:
+        if my_settings['my_ambush']['status']:
             logging.info('Found ambush')
-            await client.forward_messages(settings['my_ambush']['send_to'], event.message)     
+            await client.forward_messages(my_settings['my_ambush']['send_to'], event.message)     
             await tools.user_log(client, 'Found ambush') 
     else:
-        if settings['my_mobs']['status']:
+        if my_settings['my_mobs']['status']:
             logging.info('Found Forbidden Monsters')
-            await client.forward_messages(settings['my_mobs']['send_to'], event.message)   
+            await client.forward_messages(my_settings['my_mobs']['send_to'], event.message)   
             await tools.user_log(client, 'Found forbidden Monsters') 
   
 
@@ -327,10 +339,10 @@ async def monsters(event):
 @client.on(events.NewMessage(chats = config.CHAMPMOBS , incoming = True, pattern='.*You met some hostile creatures*'))
 async def champion(event):
     valid = ['ya entre no he marcado......','toy','se fue','next']
-    if settings['get_mobs']['status'] and status['current_hp'] > settings['arena']['min_hp']:
+    if my_settings['get_mobs']['status'] and status['current_hp'] > my_settings['arena']['min_hp']:
         
         ambush = tools.parse_monsters(event.raw_text)
-        if 'ambush!' in event.message.message and settings['get_mobs']['status']:
+        if 'ambush!' in event.message.message and my_settings['get_mobs']['status']:
             
             min_level=ambush['level']-10
             max_level=ambush['level']+10
@@ -411,7 +423,7 @@ async def go_to_quest(place, event):
 
 async def get_quest_place(text, tod):
     valid = ['Swamp', 'Valley', 'Forest']
-    if settings['quest']['fire'] and '🔥' in text:
+    if my_settings['quest']['fire'] and '🔥' in text:
         quests = {'Swamp': 'Swamp', 'Mountain': 'Valley', 'Forest': 'Forest'}
         lines = text.split('\n')
         for line in lines:
@@ -421,8 +433,8 @@ async def get_quest_place(text, tod):
                     if str(k) in place:
                         return quests[k]
 
-    elif tod in settings['quest'].keys():
-        place = settings['quest'][tod]
+    elif tod in my_settings['quest'].keys():
+        place = my_settings['quest'][tod]
         if place == 'Random':
             return random.choice(valid)
         elif place in valid:
@@ -435,16 +447,16 @@ async def get_quest_place(text, tod):
 
 @client.on(events.NewMessage(chats=config.CHAT_WARS, pattern='((.|\n)*)Many things can happen in the forest((.|\n)*)'))
 async def clicking_quest(event): 
-    if settings['arena']['status']:
+    if my_settings['arena']['status']:
         if status['time_of_day'] in ['morning', 'day', 'evening']:
             if status['arenas'] < 5 and status['gold'] > 5:
-                if status['current_hp'] > settings['arena']['min_hp']:
+                if status['current_hp'] > my_settings['arena']['min_hp']:
                     await go_to_arena(event)
                     return
 
-    if settings['quest']['status']:
+    if my_settings['quest']['status']:
         if status['current_stamina'] > 0:
-            if status['current_hp'] > settings['quest']['min_hp']:
+            if status['current_hp'] > my_settings['quest']['min_hp']:
                 place = await get_quest_place(text=event.message.text, tod=status['time_of_day'])
                 if place:
                     await go_to_quest(place, event)
@@ -456,10 +468,10 @@ async def do_something():
     await request_status_update()
     await tools.noisy_sleep(10,6)
     if status['state'] == '🛌Rest': # TODO: Add here ... or in shop
-        if status['current_stamina'] > 0 and status['current_hp'] > settings['quest']['min_hp']:
+        if status['current_stamina'] > 0 and status['current_hp'] > my_settings['quest']['min_hp']:
             await client.send_message(config.CHAT_WARS, '🗺Quests')
             return True
-        elif status['arenas'] < 5 and status['current_hp'] > settings['arena']['min_hp'] and status['gold'] > 5:
+        elif status['arenas'] < 5 and status['current_hp'] > my_settings['arena']['min_hp'] and status['gold'] > 5:
             await client.send_message(config.CHAT_WARS, '🗺Quests')
             return True
         else:
@@ -468,14 +480,14 @@ async def do_something():
 
 # Schedulers
 async def planner(max_events, initial_sleep, first_time=False):
-    if settings['arena']['status'] or settings['quest']['status'] or first_time:
+    if my_settings['arena']['status'] or my_settings['quest']['status'] or first_time:
         await tools.noisy_sleep(60*initial_sleep, 60*(initial_sleep-1))
         await request_status_update()
         await tools.noisy_sleep(7, 5)
         total_events = 0
-        if settings['arena']['status']:
+        if my_settings['arena']['status']:
             total_events += max(5 - status['arenas'], 5)
-        if settings['quest']['status']:
+        if my_settings['quest']['status']:
             total_events += status['current_stamina']
         total_events = min(max_events, total_events)
         await tools.user_log(client, '{} events scheduled for this period'.format(total_events)) 
@@ -494,22 +506,22 @@ async def planner(max_events, initial_sleep, first_time=False):
 
 @aiocron.crontab(cwc.morning())
 async def morning_planner():
-    if settings['quest']['morning']:
+    if my_settings['quest']['morning']:
         await planner(12, 12)
     
 @aiocron.crontab(cwc.day())
 async def day_planner():
-    if settings['quest']['day']:
+    if my_settings['quest']['day']:
         await planner(12, 3)
     
 @aiocron.crontab(cwc.evening())
 async def evening_planner():
-    if settings['quest']['evening']:
+    if my_settings['quest']['evening']:
         await planner(12, 3)
     
 @aiocron.crontab(cwc.night())
 async def night_planner():
-    if settings['quest']['night']:
+    if my_settings['quest']['night']:
         await planner(12, 3)
    
 

@@ -1,6 +1,7 @@
 import config 
 import asyncio
 import random
+from settings import all_settings
 
 emojis = {
     'Bear': '🐻',
@@ -16,20 +17,6 @@ emojis = {
     'Esquire': '🐣'
 }
 
-settings_emoji = {
-    'foray': '🗡',
-    'report': '📜',
-    'order': '⚜️',
-    'arena': '📯',
-    'quest': '🗺',
-    'my_mobs': '👾',
-    'my_ambush': '🐙',
-    'get_mobs': '⚔️👾',
-    'get_ambush': '⚔️🐙',
-    'my_shop': '⚒️',
-    'auction': '🛎',
-}
-
 castle_emojis = ['🥔', '🦅', '🦌', '🐉', '🦈', '🐺', '🌑']
 
 async def noisy_sleep(t_max, t_min=0):
@@ -41,61 +28,6 @@ async def user_log(client, text):
 
 def bool2emoji(boolean):
     return '✔️' if boolean else '❌'
-
-
-validator = {
-    "foray": {
-        "status": [True, False], 
-        "pledge": [True, False]
-        }, 
-    "report": {
-        "status": [True, False], 
-        "send_to": "int"
-        }, 
-    "order": {"status": [True, False], 
-        "target": "order", 
-        "default": "order", 
-        "source": ["botniato", "default"]
-    }, 
-    "arena": {
-        "status": [True, False], 
-        "min_hp": "int"
-        }, 
-    "quest": {
-        "status": [True, False], 
-        "morning": ["Random", "Swamp", "Forest", "Valley", "Foray", None], 
-        "day": ["Random", "Swamp", "Forest", "Valley", "Foray", None], 
-        "evening": ["Random", "Swamp", "Forest", "Valley", "Foray", None], 
-        "night": ["Random", "Swamp", "Forest", "Valley", "Foray", None], 
-        "min_hp": "int",
-         "fire": [True, False]
-         }, 
-    "my_mobs": {
-        "status": [True, False], 
-        "send_to": "int"
-        }, 
-    "my_ambush": {
-        "status": [True, False], 
-        "send_to": "int"
-        }, 
-    "get_ambush": {
-        "status": [True, False], 
-        "send_to": "int"
-        },
-    "get_mobs": {
-        "status": [True, False], 
-        "send_to": "int"
-        },
-    "my_shop": {
-        "status": [True, False]    
-        },
-    "auction": {
-        "status": [True, False], 
-        "read_from": "int"
-        },
-    }
-
-
 
 def special_validator(method, val):
     if method == "int":
@@ -119,7 +51,7 @@ def special_validator(method, val):
 
 
 def validate(sett, subsett, val):
-    values = validator[sett][subsett]
+    values = all_settings[sett]["subsetts"][subsett]['validator']
     if type(values) is list:
         if val in values:
             return True, None
