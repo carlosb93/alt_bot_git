@@ -121,6 +121,12 @@ class ChatWarsCron():
         else:
             return 'night'
 
+    def get_current_day_third(self, string):
+        hour, minute, sec = (int(chunk) for chunk in string.split(':'))
+        hour = (24 + hour - self.utc_delay + (8 - self.war_times[0])) % 24
+        cw_day_third = hour // 8 
+        return cw_day_third + 1
+       
     def get_possible_events(self, string):
         hour, minute, sec = (int(chunk) for chunk in string.split(':'))
         hour = (24 + hour - self.utc_delay + (8 - self.war_times[0])) % 24 
@@ -129,6 +135,12 @@ class ChatWarsCron():
 
         minute += 60 * cw_time
         return max(int((120 - minute)/10) - 1, 0)
+def find_emoji(text):
+    words = text.split()
+    for w in words:
+        if w in emojis.keys():
+            return emojis[w]
+    return '👾'
 
 def parse_monsters(text):
     lines = text.split('\n')
@@ -138,7 +150,7 @@ def parse_monsters(text):
     for i, l in enumerate(description):
         if 'lvl.' in l:
             levels.append(int(l.split(' ')[-1][4:]))
-            emoji = find_emoji(l)
+            emoji = find_emoji(l) #TODO: This function does not exists
             if l[0].isdigit():
                 description[i] = description[i][:4] + emoji + description[i][4:]
             else:
@@ -147,7 +159,10 @@ def parse_monsters(text):
     level = sum(levels)/len(levels)
     return {"link": link, "description": description, "level": level}
 
-
+# c = ChatWarsCron(1)
+# for i in range(24):
+#     j = c.get_current_day_third('{}:10:30'.format(i))
+#     print(i,j)
 
 tiers = {
     't2Armor': ['Order Armor','Hunter Armor','Clarity Robe'],#2

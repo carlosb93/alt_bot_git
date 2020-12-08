@@ -341,54 +341,62 @@ async def monsters(event):
             await client.forward_messages(my_settings['my_mobs']['send_to'], event.message)   
             await tools.user_log(client, 'Found forbidden Monsters') 
   
-
+# TODO: Fix this implementation
 # Hunting other people mobs
 @client.on(events.NewMessage(chats = [my_settings['get_mobs']['from_group'], my_settings['get_ambush']['from_group']], incoming = True, pattern='.*You met some hostile creatures*'))
-async def champion(event):
-    valid = ['ya entre no he marcado......','toy','se fue','next']
-    if my_settings['get_mobs']['status'] and status['current_hp'] > my_settings['arena']['min_hp']:
-        
-        ambush = tools.parse_monsters(event.raw_text)
-        if 'ambush!' in event.message.message and my_settings['get_ambush']['status']:
+async def mobs_from_group(event):
+    if my_settings['get_mobs']['status'] or my_settings['get_ambush'] ['status']:
+        # Update status before choosing
+        await request_status_update()
+        parsed_mobs = tools.parse_monsters(event.raw_text)
+        await tools.noisy_sleep(2,1)
+
+        # TODO: Check if sleep mode is active
+        if status['current_stamina'] > 0 and status['current_hp'] > my_settings['arena']['min_hp'] and (status['state'] == '🛌Rest' or status['state'] == '⚒At the shop'): 
             
-            min_level=ambush['level']-10
-            max_level=ambush['level']+10
-            
-            if status['mobsmsg'] == event.message.message:
-                pass
-            else: 
-                if min_level <= int(status['level']) and int(status['level']) <= max_level:
-                    await tools.noisy_sleep(5)
-                    status['mobsmsg'] = event.message.message
-                    await tools.user_log(client, '👾Fighting Forbidden Monsters in range')
-                    await client.send_message(config.CHAT_WARS, event.message.message)
-                    await tools.noisy_sleep(5)
-                    msg = random.choice(valid)
-                    await client.send_message(my_settings['get_ambush']['from_group'], msg)
-                else:
-                    if ambush['level'] < int(status['level']):
+            valid = ['ya entre no he marcado......','toy','se fue','next']
+
+            # Go to an ambush
+            if 'ambush!' in event.message.message:
+                if my_settings['get_ambush']['status']:                
+                    # if status['current_hp'] > my_settings['arena']['min_hp']:
+
+                    min_level = parsed_mobs['level'] - 10
+                    max_level = parsed_mobs['level'] + 10
+                    
+                    if not status['mobsmsg'] == event.message.message:
+                        if min_level <= int(status['level']) and int(status['level']) <= max_level:
+                            await tools.noisy_sleep(5)
+                            status['mobsmsg'] = event.message.message
+                            await tools.user_log(client, '👾Fighting Forbidden Monsters in range')
+                            await client.send_message(config.CHAT_WARS, event.message.message)
+                            await tools.noisy_sleep(5)
+                            msg = random.choice(valid)
+                            await client.send_message(config.CHAMPMOBS, msg)
+
+                        elif parsed_mobs['level'] < int(status['level']):
+                            status['mobsmsg'] = event.message.message
+                            await tools.user_log(client, '👾Fighting Forbidden Monsters over range')
+                            await client.send_message(config.CHAT_WARS, event.message.message)
+                            await tools.noisy_sleep(5)
+                            msg = random.choice(valid)
+                            await client.send_message(config.CHAMPMOBS, msg)
+
+            # Go to common mobs
+            elif my_settings['get_mobs']['status']:    
+                
+                # if status['current_hp'] > my_settings['arena']['min_hp']:        
+                min_level = parsed_mobs['level'] - 10
+                max_level = parsed_mobs['level'] + 10
+                
+                if not status['mobsmsg'] == event.message.message:
+                    if min_level <= int(status['level']) and int(status['level']) <= max_level:
                         status['mobsmsg'] = event.message.message
-                        await tools.user_log(client, '👾Fighting Forbidden Monsters over range')
-                        await client.send_message(config.CHAT_WARS, event.message.message)
+                        await tools.user_log(client, 'Fighting Monsters in range')
+                        await client.send_message(config.CHAT_WARS, parsed_mobs['link'])
                         await tools.noisy_sleep(5)
                         msg = random.choice(valid)
                         await client.send_message(my_settings['get_ambush']['from_group'], msg)
-        else:
-            
-            min_level=ambush['level']-10
-            max_level=ambush['level']+10
-            
-            if status['mobsmsg'] == event.message.message:
-                pass
-            else: 
-                if min_level <= int(status['level']) and int(status['level']) <= max_level:
-                    status['mobsmsg'] = event.message.message
-                    await tools.user_log(client, 'Fighting Monsters in range')
-                    await client.send_message(config.CHAT_WARS, ambush['link'])
-                    await tools.noisy_sleep(5)
-                    msg = random.choice(valid)
-                    await client.send_message(my_settings['get_mobs']['from_group'], msg)
-
 
 ############ QUESTS AND ARENAS ############
 @client.on(events.NewMessage(chats=config.CHAT_WARS, pattern='((.|\n)*)Dirty air is soaked with the thick smell of blood((.|\n)*)'))
@@ -524,23 +532,45 @@ async def planner(max_events, initial_sleep, first_time=False):
         await tools.noisy_sleep(7,3)
         await open_shop()
 
+def check_third_of_day():
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    return cwc.get_current_day_third(current_time)
+
+
 @aiocron.crontab(cwc.morning())
 async def morning_planner():
+    if my_settings['sleep']['status']:
+        third = check_third_of_day()
+        if third == my_settings['sleep']['third']:
+            return
     if my_settings['quest']['morning']:
         await planner(12, 12)
     
 @aiocron.crontab(cwc.day())
 async def day_planner():
+    if my_settings['sleep']['status']:
+        third = check_third_of_day()
+        if third == my_settings['sleep']['third']:
+            return
     if my_settings['quest']['day']:
         await planner(12, 3)
     
 @aiocron.crontab(cwc.evening())
 async def evening_planner():
+    if my_settings['sleep']['status']:
+        third = check_third_of_day()
+        if third == my_settings['sleep']['third']:
+            return
     if my_settings['quest']['evening']:
         await planner(12, 3)
     
 @aiocron.crontab(cwc.night())
 async def night_planner():
+    if my_settings['sleep']['status']:
+        third = check_third_of_day()
+        if third == my_settings['sleep']['third']:
+            return
     if my_settings['quest']['night']:
         await planner(12, 3)
    
