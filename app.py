@@ -63,9 +63,6 @@ async def request_status_update():
 # Update the status parsing Me
 @client.on(events.NewMessage(chats=config.CHAT_WARS, incoming = True, pattern=r'Battle of the seven castles in|🌟Congratulations! New level!🌟'))
 async def update_status(event):
- 
-    # global arena, daily_arenas, quest, to_quest, endurance, endurance_max, state, alt_class, castle
-  
     status['current_stamina'] = int(re.search(r'Stamina: (\d+)', event.raw_text).group(1))
     status['max_stamina'] = int(re.search(r'Stamina: (\d+)/(\d+)', event.raw_text).group(2))
     status['current_hp'] = int(re.search(r'Hp: (\d+)', event.raw_text).group(1))
@@ -326,8 +323,7 @@ async def monsters(event):
             await tools.user_log(client, 'Found forbidden Monsters') 
   
 
-# TODO: Add logic to hunt other people mobs
-
+# Hunting other people mobs
 @client.on(events.NewMessage(chats = config.CHAMPMOBS , incoming = True, pattern='.*You met some hostile creatures*'))
 async def champion(event):
     valid = ['ya entre no he marcado......','toy','se fue','next']
