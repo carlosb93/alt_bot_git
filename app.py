@@ -83,8 +83,16 @@ async def update_status(event):
                     back = line[1:]
                 last_words = back.split(' ')
                 status['class'] = tools.emojis[last_words[-4]]
+                
+            if line[1:6] == 'Level':
+                status['level'] = int(line[8:])
+                
             if line[0].startswith('💰'):
                 status['gold'] = int(line[1:].split()[0])
+                
+    if (status['class'] == '⚒️' or status['class'] == '⚗️') and status['state'] == '🛌Rest' and settings['quest']['status'] == True and settings['my_shop']['status'] == True:
+        await tools.noisy_sleep(3)
+        await client.send_message(config.CHAT_WARS, '/myshop_open') 
 
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")   
@@ -99,7 +107,7 @@ async def status_all(event):
     msg =  '''
 <b> Player Status:</b>\n
 🏰Castle: {castle} 
-👨‍🏫Class: {class}
+👨‍🏫Class: {class} 🏅Level: {level}
 💰 Money: {gold}
 🔋 Stamina: {current_stamina}/{max_stamina}
 ❤️ Hp: {current_hp}/{max_hp}
@@ -119,7 +127,7 @@ async def reset_stuff():
 
 ############ HELP ############
 # Show current commands
-@client.on(events.NewMessage(chats=config.GROUP, pattern='/help'))
+@client.on(events.NewMessage(chats=[config.GROUP,config.MAIN_ID], pattern='/help'))
 async def help(event):
     res = '<b>Commands available:</b>\n\n'
     res += '/settings <i>Show your current configuration</i>\n'
@@ -130,7 +138,7 @@ async def help(event):
 
 ############ SETTINGS ############
 # Retreive current user settings
-@client.on(events.NewMessage(chats=config.GROUP, pattern='/settings'))
+@client.on(events.NewMessage(chats=[config.GROUP,config.MAIN_ID], pattern='/settings'))
 async def get_settings(event):
     res = '<b>User settings:</b>\n\n'
     for s in settings:
@@ -162,7 +170,7 @@ def save_settings():
         json.dump(settings, f)
 
 # Enable/disable the settings
-@client.on(events.NewMessage(chats=config.GROUP, pattern='/set'))
+@client.on(events.NewMessage(chats=[config.GROUP,config.MAIN_ID], pattern='/set'))
 async def update_settings(event):
     parsed_command = event.message.text.split()
     if parsed_command[0] == '/set':
@@ -321,20 +329,51 @@ async def monsters(event):
 
 # TODO: Add logic to hunt other people mobs
 
-# @client.on(events.NewMessage(chats = config.CHAMPMOBS , incoming = True, pattern='.*You met some hostile creatures*'))
-# async def champion(event):
-#     global mobs, champ
-#     if champ == 1:
-#         if 'ambush!' in event.message.message:
-#             if mobs == event.message.message:
-#                 pass
-#             else: 
-#                 logging.info('Fighting Champion')
-#                 mobs = event.message.message
-#                 await client.forward_messages(config.CHAT_WARS, event.message)
-#                 time.sleep(1)
-#                 await client.send_message(config.CHAMPMOBS, 'ya entre no he marcado......')
-
+@client.on(events.NewMessage(chats = config.CHAMPMOBS , incoming = True, pattern='.*You met some hostile creatures*'))
+async def champion(event):
+    valid = ['ya entre no he marcado......','toy','se fue','next']
+    if settings['get_mobs']['status'] and status['current_hp'] > settings['arena']['min_hp']:
+        
+        ambush = tools.parse_monsters(event.raw_text)
+        if 'ambush!' in event.message.message and settings['get_mobs']['status']:
+            
+            min_level=ambush['level']-10
+            max_level=ambush['level']+10
+            
+            if status['mobsmsg'] == event.message.message:
+                pass
+            else: 
+                if min_level <= int(status['level']) and int(status['level']) <= max_level:
+                    await tools.noisy_sleep(5)
+                    status['mobsmsg'] = event.message.message
+                    await tools.user_log(client, '👾Fighting Forbidden Monsters in range')
+                    await client.send_message(config.CHAT_WARS, event.message.message)
+                    await tools.noisy_sleep(5)
+                    msg = random.choice(valid)
+                    await client.send_message(config.CHAMPMOBS, msg)
+                else:
+                    if ambush['level'] < int(status['level']):
+                        status['mobsmsg'] = event.message.message
+                        await tools.user_log(client, '👾Fighting Forbidden Monsters over range')
+                        await client.send_message(config.CHAT_WARS, event.message.message)
+                        await tools.noisy_sleep(5)
+                        msg = random.choice(valid)
+                        await client.send_message(config.CHAMPMOBS, msg)
+        else:
+            
+            min_level=ambush['level']-10
+            max_level=ambush['level']+10
+            
+            if status['mobsmsg'] == event.message.message:
+                pass
+            else: 
+                if min_level <= int(status['level']) and int(status['level']) <= max_level:
+                    status['mobsmsg'] = event.message.message
+                    await tools.user_log(client, 'Fighting Monsters in range')
+                    await client.send_message(config.CHAT_WARS, ambush['link'])
+                    await tools.noisy_sleep(5)
+                    msg = random.choice(valid)
+                    await client.send_message(config.CHAMPMOBS, msg)
 
 
 ############ QUESTS AND ARENAS ############

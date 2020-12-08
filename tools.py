@@ -24,6 +24,10 @@ settings_emoji = {
     'quest': '🗺',
     'my_mobs': '👾',
     'my_ambush': '🐙',
+    'get_mobs': '⚔️👾',
+    'get_ambush': '⚔️🐙',
+    'my_shop': '⚒️',
+    'auction': '🛎',
 }
 
 castle_emojis = ['🥔', '🦅', '🦌', '🐉', '🦈', '🐺', '🌑']
@@ -73,7 +77,22 @@ validator = {
     "my_ambush": {
         "status": [True, False], 
         "send_to": "int"
-        }
+        }, 
+    "get_ambush": {
+        "status": [True, False], 
+        "send_to": "int"
+        },
+    "get_mobs": {
+        "status": [True, False], 
+        "send_to": "int"
+        },
+    "my_shop": {
+        "status": [True, False]    
+        },
+    "auction": {
+        "status": [True, False], 
+        "read_from": "int"
+        },
     }
 
 
@@ -178,3 +197,72 @@ class ChatWarsCron():
 
         minute += 60 * cw_time
         return max(int((120 - minute)/10) - 1, 0)
+
+def parse_monsters(text):
+    lines = text.split('\n')
+    link = lines[-1]
+    description = lines[1:-2]
+    levels = []
+    for i, l in enumerate(description):
+        if 'lvl.' in l:
+            levels.append(int(l.split(' ')[-1][4:]))
+            emoji = find_emoji(l)
+            if l[0].isdigit():
+                description[i] = description[i][:4] + emoji + description[i][4:]
+            else:
+                description[i] = emoji + description[i]
+    link = '<a href ="https://t.me/share/url?url=' + link + '">' + link +'</a>'
+    level = sum(levels)/len(levels)
+    return {"link": link, "description": description, "level": level}
+
+
+
+tiers = {
+    't2Armor': ['Order Armor','Hunter Armor','Clarity Robe'],#2
+    't3helmet': ['Crusader Helmet','Crusader Gauntlets','Royal Helmet','Ghost Helmet','Lion Helmet','Divine Circlet'],#2
+    't4': ['Council Boots','Griffin Boots','Celestial Boots','Council Gauntlets','Council Shield','Griffin Gloves','Celestial Bracers' ,'Griffin Knife'],#2
+    't4Helmet': ['Council Helmet','Griffin Helmet','Celestial Helmet','Poniard'],#3
+    't5': ['Manticore','Overseer','Discarnate'],#4
+}
+
+def parse_lot(text):
+    bet = ''
+    quality = 'Common'
+    precio = '0'
+    autg = ''
+    
+    lines = text.split('\n')
+    bet_link = lines[-1]
+    for item in lines:
+        if 'Quality: ' in item:
+            quality = item.split('Quality: ')[1]
+            
+        if '🛡' in item or '⚔️' in item:
+            geara = item.split(': ')[1]
+            if '⚡️' in geara:
+                gear = geara.split(' ')[1]
+                gear2 = geara.split(' ')[2]
+            else:
+                gear = geara.split(' ')[0]
+                gear2 = geara.split(' ')[1]
+                
+            autg = '{} {}'.format(gear,gear2)
+            
+            if autg in tiers['t2Armor']:
+                precio = '2'
+            if autg == 'Hunter dagger':
+                precio = '1'
+            if autg in tiers['t3helmet']:
+                precio = '2'
+            if autg in tiers['t4']:
+                precio = '2'
+            if autg in tiers['t4Helmet']:
+                precio = '3'
+            if autg in tiers['t5']:
+                precio = '4'
+                
+    if precio == '0':
+        bet = '{}'.format(bet_link)
+    else:
+        bet = '{}_{}'.format(bet_link,precio)
+    return {"bet_link": bet, "quality": quality, "precio": precio, "gear": autg }
