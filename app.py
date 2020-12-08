@@ -90,10 +90,6 @@ async def update_status(event):
             if line[0].startswith('💰'):
                 status['gold'] = int(line[1:].split()[0])
                 
-    if (status['class'] == '⚒️' or status['class'] == '⚗️') and status['state'] == '🛌Rest' and settings['quest']['status'] == True and settings['my_shop']['status'] == True:
-        await tools.noisy_sleep(3)
-        await client.send_message(config.CHAT_WARS, '/myshop_open') 
-
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")   
     status['current_time'] = current_time
@@ -215,7 +211,11 @@ async def update_settings(event):
         else:
             await tools.user_log(client, 'Wrong syntax. Try something like:\n<code>/set foray off</code>')    
             
-
+############ SHOP #############
+async def open_shop():
+    if  status['state'] == '🛌Rest' and settings['my_shop']['status'] == True:
+        await tools.noisy_sleep(3)
+        await client.send_message(config.CHAT_WARS, '/myshop_open') 
 
 ############ FORAY ############
 # Reacts to foray attempts
@@ -255,7 +255,6 @@ async def ask_botniato_order(event):
         await tools.user_log(client, 'Order requested to botniato')   
 
 #TODO: Get order from squad
-
 
 # Sets the order automatically
 @aiocron.crontab(cwc.minutes_before_war(4))
@@ -493,8 +492,9 @@ async def planner(max_events, initial_sleep, first_time=False):
                 await tools.user_log(client, 'Schedule cancelled') 
                 break
         await tools.user_log(client, 'Schedule finished') 
-        # TODO: This is a great moment to open shop
-
+        await request_status_update()
+        await tools.noisy_sleep(7,3)
+        await open_shop()
 
 @aiocron.crontab(cwc.morning())
 async def morning_planner():
