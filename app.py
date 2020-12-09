@@ -102,6 +102,10 @@ async def update_status(event):
             if line[0].startswith('💰'):
                 status['gold'] = int(line[1:].split()[0])
                 
+    if status['state'] == '🛌Rest' and my_settings['my_shop']['status'] == True:
+        await tools.noisy_sleep(10)
+        await client.send_message(config.CHAT_WARS, '/myshop_open')
+                
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")   
     status['current_time'] = current_time
@@ -226,11 +230,11 @@ async def open_shop():
         await client.send_message(config.CHAT_WARS, '/myshop_open') 
         
 # # open shop after battle
-# @aiocron.crontab(cwc.minutes_after_war(10))
-# async def openshop():
-#     if status['state'] == '🛌Rest' and settings['quest']['status'] == True and settings['my_shop']['status'] == True:
-#         await tools.noisy_sleep(3)
-#         await client.send_message(config.CHAT_WARS, '/myshop_open')
+@aiocron.crontab(cwc.minutes_after_war(10))
+async def openshop():
+    if status['state'] == '🛌Rest' and my_settings['my_shop']['status'] == True:
+        await tools.noisy_sleep(10)
+        await client.send_message(config.CHAT_WARS, '/myshop_open')
 
 ############ FORAY ############
 # Reacts to foray attempts
@@ -270,8 +274,20 @@ async def ask_botniato_order(event):
         await client.send_message(config.BOTNIATO, '⚜️ Order')
         await tools.user_log(client, 'Order requested to botniato')   
 
-#TODO: Get order from squad
 
+@client.on(events.NewMessage(from_users=ORDER_ID))
+async def get_order(event):
+    if my_settings['order']['status'] and my_settings['order']['source'] == 'squad':
+        if '⚔️' in event.raw_text or  '😡' in event.raw_text:
+            words = event.raw_text.split()
+            for w in words:
+                if w in tools.castle_emojis.keys():
+                   my_settings['order']['target'] = tools.castle_emojis[w]
+        else:
+            my_settings['order']['target']  = '🛡Defend'
+        return save_settings()
+        
+    
 # Sets the order automatically
 @aiocron.crontab(cwc.minutes_before_war(4))
 async def set_order():
@@ -345,13 +361,12 @@ async def monsters(event):
 # Hunting other people mobs
 @client.on(events.NewMessage(chats = [my_settings['get_mobs']['from_group'], my_settings['get_ambush']['from_group']], incoming = True, pattern='.*You met some hostile creatures*'))
 async def mobs_from_group(event):
-    if my_settings['get_mobs']['status'] or my_settings['get_ambush'] ['status']:
+    if (my_settings['get_mobs']['status'] or my_settings['get_ambush'] ['status']) and my_settings['sleep']['status']:
         # Update status before choosing
         await request_status_update()
         parsed_mobs = tools.parse_monsters(event.raw_text)
         await tools.noisy_sleep(2,1)
 
-        # TODO: Check if sleep mode is active
         if status['current_stamina'] > 0 and status['current_hp'] > my_settings['arena']['min_hp'] and (status['state'] == '🛌Rest' or status['state'] == '⚒At the shop'): 
             
             valid = ['ya entre no he marcado......','toy','se fue','next']
@@ -495,7 +510,7 @@ async def auction_check(event):
 async def do_something():
     await request_status_update()
     await tools.noisy_sleep(10,6)
-    if status['state'] == '🛌Rest': # TODO: Add here ... or in shop
+    if status['state'] == '🛌Rest' or status['state'] == '⚒At the shop':
         if status['current_stamina'] > 0 and status['current_hp'] > my_settings['quest']['min_hp']:
             await client.send_message(config.CHAT_WARS, '🗺Quests')
             return True
@@ -575,22 +590,18 @@ async def night_planner():
         await planner(12, 3)
    
 
-#TODO: Do something with this:
-
-#     #*********** config.DEPOSITED SUCCESSFULLY **************************
-#     # @client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*config.DEPOSITed successfully.*'))
-#     # async def config.DEPOSITs(event):
-#     # 	print('config.DEPOSITing')
-#     # 	time.sleep(2)
-#     # 	await client.forward_messages(config.DEPOSIT, event.message)
-
-
 #     #*********** STAMINA RESTORED **************************
-# @client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*Stamina restored*'))
-# async def stamina_restored(event):
-#     global stamina
-#     stamina = 1
-#     await client.send_message(config.CHAT_WARS, '🗺Quests')
+@client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*Stamina restored*'))
+async def stamina_restored(event):
+    keep_going = await do_something()
+    if keep_going:
+        await tools.noisy_sleep(60*8, 60*7)
+    else:
+        await tools.user_log(client, 'Schedule cancelled') 
+        break
+    await tools.user_log(client, 'Schedule finished')
+
+    
 
 
 async def init():

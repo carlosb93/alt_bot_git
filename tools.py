@@ -135,6 +135,7 @@ class ChatWarsCron():
 
         minute += 60 * cw_time
         return max(int((120 - minute)/10) - 1, 0)
+    
 def find_emoji(text):
     words = text.split()
     for w in words:
@@ -150,7 +151,7 @@ def parse_monsters(text):
     for i, l in enumerate(description):
         if 'lvl.' in l:
             levels.append(int(l.split(' ')[-1][4:]))
-            emoji = find_emoji(l) #TODO: This function does not exists
+            emoji = find_emoji(l)
             if l[0].isdigit():
                 description[i] = description[i][:4] + emoji + description[i][4:]
             else:
