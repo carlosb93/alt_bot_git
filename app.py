@@ -65,6 +65,20 @@ with open(datafile) as data_file:
 ############ Generator of cron strings ############ 
 cwc = tools.ChatWarsCron(config.UTC_DELAY)
 
+############ SHOP #############
+async def open_shop(intensive=False):
+    if intensive == True and not my_settings['my_shop']['intensive']:
+        return
+
+    if  status['state'] == '🛌Rest' and my_settings['my_shop']['status'] == True:
+        await tools.noisy_sleep(10)
+        await client.send_message(config.CHAT_WARS, '/myshop_open') 
+
+# open shop after battle
+@aiocron.crontab(cwc.minutes_after_war(10))
+async def openshop():
+    await open_shop(intensive=True)
+
 
 ############ STATUS ############
 
@@ -102,9 +116,7 @@ async def update_status(event):
             if line[0].startswith('💰'):
                 status['gold'] = int(line[1:].split()[0])
                 
-    if status['state'] == '🛌Rest' and my_settings['my_shop']['status'] == True:
-        await tools.noisy_sleep(10)
-        await client.send_message(config.CHAT_WARS, '/myshop_open')
+    await open_shop(intensive=True)
                 
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")   
@@ -223,18 +235,9 @@ async def update_settings(event):
         else:
             await tools.user_log(client, 'Wrong syntax. Try something like:\n<code>/set foray off</code>')    
             
-############ SHOP #############
-async def open_shop():
-    if  status['state'] == '🛌Rest' and my_settings['my_shop']['status'] == True:
-        await tools.noisy_sleep(3)
-        await client.send_message(config.CHAT_WARS, '/myshop_open') 
+
         
-# # open shop after battle
-@aiocron.crontab(cwc.minutes_after_war(10))
-async def openshop():
-    if status['state'] == '🛌Rest' and my_settings['my_shop']['status'] == True:
-        await tools.noisy_sleep(10)
-        await client.send_message(config.CHAT_WARS, '/myshop_open')
+
 
 ############ FORAY ############
 # Reacts to foray attempts

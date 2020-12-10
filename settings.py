@@ -176,6 +176,10 @@ all_settings = {
             "status": {
                 "validator": [True, False],
                 "default": False
+            },
+            "intensive": {
+                "validator": [True, False],
+                "default": False
             }
         } 
     }
