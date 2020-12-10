@@ -491,19 +491,16 @@ async def clicking_quest(event):
                     await go_to_quest(place, event)
                     
                     
-#*********** AUCTION **************************            
+############ AUCTION ############            
 @client.on(events.NewMessage(chats = my_settings['auction']['from_group'] , incoming = True, pattern='.*Lot *'))
 async def auction_check(event):
     if my_settings['auction']['status']:
-        if 'recipe' in event.message.message or 'part' in event.message.message or 'Mithril' in event.message.message or 'piece' in event.message.message or 'blade' in event.message.message or 'shaft' in event.message.message or 'shard' in event.message.message or 'head' in event.message.message or 'fragment' in event.message.message or 'Scroll' in event.message.message or 'Storm' in event.message.message:
-            pass
-        else:
-            parse_lot = tools.parse_lot(event.raw_text)
-            if parse_lot['quality'] == 'Common':
-                msg = parse_lot['bet_link']
-                await client.send_message(config.CHAT_WARS, msg)
-                await tools.user_log(client, '{}\n{}'.format(parse_lot['gear'], parse_lot['bet_link']))            
-
+        parsed_lot = tools.parse_lot(event.raw_text)
+        if parsed_lot and parse_lot['quality'] == 'Common':
+            msg = parsed_lot['bet_link']
+            await client.send_message(config.CHAT_WARS, msg)
+            await tools.user_log(client, '{}\n{}'.format(parsed_lot['gear'], parsed_lot['bet_link']))  
+        
 
 # This function needs to be scheduled often
 async def do_something():

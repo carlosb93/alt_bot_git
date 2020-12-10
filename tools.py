@@ -160,24 +160,37 @@ def parse_monsters(text):
     level = sum(levels)/len(levels)
     return {"link": link, "description": description, "level": level}
 
-# c = ChatWarsCron(1)
-# for i in range(24):
-#     j = c.get_current_day_third('{}:10:30'.format(i))
-#     print(i,j)
 
-tiers = {
-    't2Armor': ['Order Armor','Hunter Armor','Clarity Robe'],#2
-    't3helmet': ['Crusader Helmet','Crusader Gauntlets','Royal Helmet','Ghost Helmet','Lion Helmet','Divine Circlet'],#2
-    't4': ['Council Boots','Griffin Boots','Celestial Boots','Council Gauntlets','Council Shield','Griffin Gloves','Celestial Bracers' ,'Griffin Knife'],#2
-    't4Helmet': ['Council Helmet','Griffin Helmet','Celestial Helmet','Poniard'],#3
-    't5': ['Manticore','Overseer','Discarnate'],#4
+buy_list = {
+    'Hunter Dagger': 1,
+    'Order Armor': 2,
+    'Hunter Armor': 2,
+    'Clarity Robe': 2,
+    'Crusader Helmet': 2,
+    'Royal Helmet': 2,
+    'Ghost Helmet': 2,
+    'Lion Helmet': 2,
+    'Divine Circlet': 2,    
+    'Council Boots': 2,
+    'Griffin Boots': 2,
+    'Celestial Boots': 2,
+    'Council Gauntlets': 2,
+    'Council Shield': 2,
+    'Griffin Gloves': 2,
+    'Celestial Bracers': 2,
+    'Griffin Knife': 2,  
+    'Council Helmet': 3,
+    'Griffin Helmet': 3,
+    'Celestial Helmet': 3,
 }
 
+blacklist = ['recipe', 'part', 'Mithril', 'piece', 'blade', 'shaft', 'shard', 'head', 'fragment', 'Scroll', 'Storm']
+  
 def parse_lot(text):
-    bet = ''
-    quality = 'Common'
-    precio = '0'
-    autg = ''
+    for e in blacklist:
+        if e in text:
+            return
+    bet, quality, precio, autg = '', 'Common', 0, ""
     
     lines = text.split('\n')
     bet_link = lines[-1]
@@ -187,30 +200,19 @@ def parse_lot(text):
             
         if '🛡' in item or '⚔️' in item:
             geara = item.split(': ')[1]
+            off = 0
             if '⚡️' in geara:
-                gear = geara.split(' ')[1]
-                gear2 = geara.split(' ')[2]
-            else:
-                gear = geara.split(' ')[0]
-                gear2 = geara.split(' ')[1]
-                
+                off += 1
+            gear = geara.split(' ')[off]
+            gear2 = geara.split(' ')[off + 1]         
             autg = '{} {}'.format(gear,gear2)
-            
-            if autg in tiers['t2Armor']:
-                precio = '2'
-            if autg == 'Hunter dagger':
-                precio = '1'
-            if autg in tiers['t3helmet']:
-                precio = '2'
-            if autg in tiers['t4']:
-                precio = '2'
-            if autg in tiers['t4Helmet']:
-                precio = '3'
-            if autg in tiers['t5']:
-                precio = '4'
+
+            if autg in buy_list.keys():
+                precio = buy_list[autg]            
+
                 
-    if precio == '0':
+    if precio == 0:
         bet = '{}'.format(bet_link)
     else:
-        bet = '{}_{}'.format(bet_link,precio)
+        bet = '{}_{}'.format(bet_link, precio)
     return {"bet_link": bet, "quality": quality, "precio": precio, "gear": autg }
