@@ -365,7 +365,11 @@ async def monsters(event):
 # Hunting other people mobs
 @client.on(events.NewMessage(chats = [my_settings['get_mobs']['from_group'], my_settings['get_ambush']['from_group']], incoming = True, pattern='.*You met some hostile creatures*'))
 async def mobs_from_group(event):
-    if (my_settings['get_mobs']['status'] or my_settings['get_ambush'] ['status']) and my_settings['sleep']['status']:
+    if my_settings['sleep']['status']:
+        third = check_third_of_day()
+        if third == my_settings['sleep']['third']:
+            return
+    if my_settings['get_mobs']['status'] or my_settings['get_ambush'] ['status']:
         # Update status before choosing
         await request_status_update()
         parsed_mobs = tools.parse_monsters(event.raw_text)
