@@ -365,61 +365,52 @@ async def monsters(event):
 # Hunting other people mobs
 @client.on(events.NewMessage(chats = [my_settings['get_mobs']['from_group'], my_settings['get_ambush']['from_group']], incoming = True, pattern='.*You met some hostile creatures*'))
 async def mobs_from_group(event):
+    # Check if is sleep time
     if my_settings['sleep']['status']:
         third = check_third_of_day()
         if third == my_settings['sleep']['third']:
             return
+
     if my_settings['get_mobs']['status'] or my_settings['get_ambush'] ['status']:
         # Update status before choosing
-        await request_status_update()
-        parsed_mobs = tools.parse_monsters(event.raw_text)
-        await tools.noisy_sleep(2,1)
+        if not status['mobsmsg'] == event.message.message:
+            await request_status_update()
+            parsed_mobs = tools.parse_monsters(event.raw_text)
+            await tools.noisy_sleep(2,1)
 
-        if status['current_stamina'] > 0 and status['current_hp'] > my_settings['arena']['min_hp'] and (status['state'] == '🛌Rest' or status['state'] == '⚒At the shop'): 
-            
-            valid = ['ya entre no he marcado......','toy','se fue','next']
-
-            # Go to an ambush
-            if 'ambush!' in event.message.message:
-                if my_settings['get_ambush']['status']:                
-                    # if status['current_hp'] > my_settings['arena']['min_hp']:
-
-                    min_level = parsed_mobs['level'] - 10
-                    max_level = parsed_mobs['level'] + 10
-                    
-                    if not status['mobsmsg'] == event.message.message:
-                        if min_level <= int(status['level']) and int(status['level']) <= max_level:
-                            await tools.noisy_sleep(5)
-                            status['mobsmsg'] = event.message.message
-                            await tools.user_log(client, '👾Fighting Forbidden Monsters in range')
-                            await client.send_message(config.CHAT_WARS, event.message.message)
-                            await tools.noisy_sleep(5)
-                            msg = random.choice(valid)
-                            await client.send_message(config.CHAMPMOBS, msg)
-
-                        elif parsed_mobs['level'] < int(status['level']):
-                            status['mobsmsg'] = event.message.message
-                            await tools.user_log(client, '👾Fighting Forbidden Monsters over range')
-                            await client.send_message(config.CHAT_WARS, event.message.message)
-                            await tools.noisy_sleep(5)
-                            msg = random.choice(valid)
-                            await client.send_message(config.CHAMPMOBS, msg)
-
-            # Go to common mobs
-            elif my_settings['get_mobs']['status']:    
+            # Check if there is stamina or the player is not in other duties
+            if status['current_stamina'] > 0 and (status['state'] == '🛌Rest' or status['state'] == '⚒At the shop'): 
+                is_ambush = 'ambush!' in event.message.message                
+                if is_ambush and my_settings['get_ambush']['status'] and status['current_hp'] > my_settings['arena']['min_hp']: #TODO: Update with a dedicated min_hp param for ambush
+                    message = '👾Fighting ambush'
+                elif not is_ambush and  my_settings['get_mobs']['status'] and status['current_hp'] > my_settings['arena']['min_hp']: #TODO: Update with a dedicated min_hp param for mobs
+                    message = '👾Fighting mobs from group'
+                else:
+                    return
                 
-                # if status['current_hp'] > my_settings['arena']['min_hp']:        
+                valid = ['Me fui', 'toy', 'se fue', 'next', 'estoy', 'go', 'me fui', 'entré', 'voy pa dentro']
+
                 min_level = parsed_mobs['level'] - 10
                 max_level = parsed_mobs['level'] + 10
                 
-                if not status['mobsmsg'] == event.message.message:
-                    if min_level <= int(status['level']) and int(status['level']) <= max_level:
-                        status['mobsmsg'] = event.message.message
-                        await tools.user_log(client, 'Fighting Monsters in range')
-                        await client.send_message(config.CHAT_WARS, parsed_mobs['link'])
-                        await tools.noisy_sleep(5)
-                        msg = random.choice(valid)
-                        await client.send_message(my_settings['get_ambush']['from_group'], msg)
+                
+                if status['level'] in range(min_level, max_level):
+                    message += ' in range.'
+                elif (parsed_mobs['level'] < status['level']) and is_ambush:
+                    message += ' of lower level.'
+                else:
+                    return
+
+                await tools.noisy_sleep(5)
+                status['mobsmsg'] = event.message.message
+                await tools.user_log(client, message)
+                await client.send_message(config.CHAT_WARS, parsed_mobs['link'])
+                await tools.noisy_sleep(5)
+                msg = random.choice(valid)
+                await client.send_message(config.CHAMPMOBS, msg)
+
+
+
 
 ############ QUESTS AND ARENAS ############
 @client.on(events.NewMessage(chats=config.CHAT_WARS, pattern='((.|\n)*)Dirty air is soaked with the thick smell of blood((.|\n)*)'))
