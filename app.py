@@ -589,16 +589,14 @@ async def night_planner():
         await planner(12, 3)
    
 
-#     #*********** STAMINA RESTORED **************************
+########### STAMINA RESTORED ###########
 @client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*Stamina restored*'))
 async def stamina_restored(event):
-    keep_going = await do_something()
-    if keep_going:
-        await tools.noisy_sleep(60*8, 60*7)
-    else:
-        await tools.user_log(client, 'Schedule cancelled') 
-        break
-    await tools.user_log(client, 'Schedule finished')
+    if my_settings['sleep']['status']:
+        third = check_third_of_day()
+        if third == my_settings['sleep']['third']:
+            return    
+    await planner(1, 3)
 
     
 
