@@ -496,7 +496,7 @@ async def clicking_quest(event):
 async def auction_check(event):
     if my_settings['auction']['status']:
         parsed_lot = tools.parse_lot(event.raw_text)
-        if parsed_lot and parse_lot['quality'] == 'Common':
+        if parsed_lot and parsed_lot['quality'] == 'Common':
             msg = parsed_lot['bet_link']
             await client.send_message(config.CHAT_WARS, msg)
             await tools.user_log(client, '{}\n{}'.format(parsed_lot['gear'], parsed_lot['bet_link']))  
