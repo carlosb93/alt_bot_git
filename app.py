@@ -277,18 +277,19 @@ async def ask_botniato_order(event):
         await client.send_message(config.BOTNIATO, '⚜️ Order')
         await tools.user_log(client, 'Order requested to botniato')   
 
-
-@client.on(events.NewMessage(from_users=ORDER_ID))
-async def get_order(event):
-    if my_settings['order']['status'] and my_settings['order']['source'] == 'squad':
-        if '⚔️' in event.raw_text or  '😡' in event.raw_text:
-            words = event.raw_text.split()
-            for w in words:
-                if w in tools.castle_emojis.keys():
-                   my_settings['order']['target'] = tools.castle_emojis[w]
-        else:
-            my_settings['order']['target']  = '🛡Defend'
-        return save_settings()
+# TODO: Test this before moving to production (ORDER_ID undefined, all_settings validator has no attribute squad, etc)
+# Requests order from squad
+# @client.on(events.NewMessage(from_users=ORDER_ID))
+# async def get_order(event):
+#     if my_settings['order']['status'] and my_settings['order']['source'] == 'squad':
+#         if '⚔️' in event.raw_text or  '😡' in event.raw_text:
+#             words = event.raw_text.split()
+#             for w in words:
+#                 if w in tools.castle_emojis:
+#                    my_settings['order']['target'] = tools.castle_emojis[w]
+#         else:
+#             my_settings['order']['target']  = '🛡Defend'
+#         return save_settings()
         
     
 # Sets the order automatically
