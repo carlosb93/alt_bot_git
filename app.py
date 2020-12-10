@@ -404,7 +404,7 @@ async def mobs_from_group(event):
                 await tools.noisy_sleep(5)
                 status['mobsmsg'] = event.message.message
                 await tools.user_log(client, message)
-                await client.send_message(config.CHAT_WARS, parsed_mobs['link'])
+                await client.forward_messages(config.CHAT_WARS, event.message)
                 await tools.noisy_sleep(5)
                 msg = random.choice(valid)
                 await client.send_message(config.CHAMPMOBS, msg)
