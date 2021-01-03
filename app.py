@@ -396,18 +396,20 @@ async def mobs_from_group(event):
                 
                 if status['level'] in range(min_level, max_level):
                     message += ' in range.'
-                elif (parsed_mobs['level'] < status['level']) and is_ambush:
-                    message += ' of lower level.'
+                    
+                    await tools.noisy_sleep(5)
+                    status['mobsmsg'] = event.message.message
+                    await tools.user_log(client, message)
+                    await client.forward_messages(config.CHAT_WARS, event.message)
+                    await tools.noisy_sleep(5)
+                    msg = random.choice(valid)
+                    await client.send_message(config.CHAMPMOBS, msg)
+                # elif (parsed_mobs['level'] < status['level']) and is_ambush:
+                #     message += ' of lower level.'
                 else:
                     return
 
-                await tools.noisy_sleep(5)
-                status['mobsmsg'] = event.message.message
-                await tools.user_log(client, message)
-                await client.send_message(config.CHAT_WARS, parsed_mobs['link'])
-                await tools.noisy_sleep(5)
-                msg = random.choice(valid)
-                await client.send_message(config.CHAMPMOBS, msg)
+               
 
 
 
