@@ -443,7 +443,7 @@ async def go_to_arena(event):
         status['arenas'] += 1
         await tools.user_log(client, 'Doing arena {}'.format(status['arenas'])) 
     else:
-        await client.send_message(config.CHAT_WARS, '/hero') #TODO: Change for a better '⬅️Back' 
+        await client.send_message(config.CHAT_WARS, '⬅️Back')
 
 
 
