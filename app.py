@@ -353,6 +353,12 @@ async def location(event):
     
 
 ############ FORBIDDEN MONSTERS ############
+# Event Mobs
+@client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*You found a strange hideout*'))
+async def event(event):
+    await client.forward_messages(my_settings['my_mobs']['send_to'], event.message)     
+    await tools.user_log(client, 'Found event') 
+   
 
 # My mobs
 @client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*You met some hostile creatures*'))
