@@ -379,7 +379,7 @@ async def mobs_from_group(event):
             await tools.noisy_sleep(2,1)
 
             # Check if there is stamina or the player is not in other duties
-            if status['current_stamina'] > 0 and (status['state'] == '🛌Rest' or status['state'] == '⚒At the shop'): 
+            if status['current_stamina'] > 0 and (status['state'] in ['🛌Rest', '⚒At the shop', '⚗️At the shop']): 
                 is_ambush = 'ambush!' in event.message.message                
                 if is_ambush and my_settings['get_ambush']['status'] and status['current_hp'] > my_settings['arena']['min_hp']: #TODO: Update with a dedicated min_hp param for ambush
                     message = '👾Fighting ambush'
@@ -506,7 +506,7 @@ async def auction_check(event):
 async def do_something():
     await request_status_update()
     await tools.noisy_sleep(10,6)
-    if status['state'] == '🛌Rest' or status['state'] == '⚒At the shop':
+    if status['state'] in ['🛌Rest', '⚒At the shop', '⚗️At the shop']:
         if status['current_stamina'] > 0 and status['current_hp'] > my_settings['quest']['min_hp']:
             await client.send_message(config.CHAT_WARS, '🗺Quests')
             return True
