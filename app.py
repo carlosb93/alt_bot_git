@@ -262,10 +262,11 @@ async def pledge(event):
 # Trader
 @client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*You defended villagers well. In exchange for your help, local trader offered you a deal*'))
 async def trader(event):
-    res = '10'
-    cant = int(event.message.text.split('\n')[0].split()[-1][:-1])
-    await tools.noisy_sleep(40, 10)
-    await client.send_message(config.CHAT_WARS, '/sc {} {}'.format(res, cant))
+    if my_settings['foray']['status'] and my_settings['foray']['trader']:
+        res = my_settings['foray']['trader']
+        cant = int(event.message.text.split('\n')[0].split()[-1][:-1])
+        await tools.noisy_sleep(40, 10)
+        await client.send_message(config.CHAT_WARS, '/sc {} {}'.format(res, cant))
 
 
 ############ BATTLES ############
