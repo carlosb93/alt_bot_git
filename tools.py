@@ -29,12 +29,16 @@ async def user_log(client, text):
 def bool2emoji(boolean):
     return '✔️' if boolean else '❌'
 
+
+def inv_validation(val):
+    if type(val) is int:
+        return True, None
+    else:
+        return False, ["Integer numbers"]
+
 def special_validator(method, val):
     if method == "int":
-        if type(val) is int:
-            return True, None
-        else:
-            return False, ["Integer numbers"]
+        return inv_validation(val)
     if method == "order":
         if val in castle_emojis:
             return True, None
@@ -49,15 +53,20 @@ def special_validator(method, val):
         else:
             return False, castle_emojis + ['/ga_def_xxx', '/ga_atk_xxx', '/g_def', '/g_atk TAG']
 
-
+def int2res(num):
+    if inv_validation(num)[0]:
+        res = str(num)
+        if len(res) < 2:
+            res = '0' + res
+        return res
+    return num
+    
 def validate(sett, subsett, val):
     values = all_settings[sett]["subsetts"][subsett]['validator']
     if type(values) is list:
         if val in values:
             return True, None
         else:
-            print(val)
-            print(values)
             return False, values
     elif type(values) is str:
         return special_validator(values, val)
