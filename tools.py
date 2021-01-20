@@ -56,6 +56,8 @@ def validate(sett, subsett, val):
         if val in values:
             return True, None
         else:
+            print(val)
+            print(values)
             return False, values
     elif type(values) is str:
         return special_validator(values, val)
