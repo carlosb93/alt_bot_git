@@ -81,6 +81,7 @@ async def openshop():
 
 
 ############ STATUS ############
+status['block'] = False
 
 # Request an status update
 async def request_status_update():
@@ -136,6 +137,7 @@ async def status_all(event):
 🔋 Stamina: {current_stamina}/{max_stamina}
 ❤️ Hp: {current_hp}/{max_hp}
 📯 Arenas: {arenas}/5
+Block: {block}
 Curently: {state}
 In CW: {time_of_day}
 --- server time: {current_time}'''.format(**status)
@@ -246,12 +248,14 @@ async def update_settings(event):
     pattern='((.|\n)*)You were strolling around on your horse when you noticed((.|\n)*)'))
 async def stop_foray(event):
     if my_settings['foray']['status']:
+        status['block'] =  True
         buttons = await event.get_buttons()
         for bline in buttons:
             for button in bline:
                 await tools.noisy_sleep(120)
                 await button.click()
         await tools.user_log(client, '🗡Foray Intervene ')
+        status['block'] =  False
 
 # Pledge
 @client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*After a successful act of violence, as a brave knight you are, you felt some guilt and decided to talk with your victims*'))
@@ -549,12 +553,16 @@ async def planner(max_events, initial_sleep, first_time=False):
         await tools.user_log(client, '{} events scheduled for this period'.format(total_events)) 
         for e in range(total_events):
             await tools.user_log(client, 'Doing event {}'.format(e + 1)) 
-            keep_going = await do_something()
-            if keep_going:
-                await tools.noisy_sleep(60*8, 60*7)
+            if status['block'] ==  False:
+                keep_going = await do_something()
+                if keep_going:
+                    await tools.noisy_sleep(60*8, 60*7)
+                else:
+                    await tools.user_log(client, 'Schedule cancelled') 
+                    break
             else:
-                await tools.user_log(client, 'Schedule cancelled') 
-                break
+                await tools.user_log(client, 'Schedule waiting for foray to end') 
+
         await tools.user_log(client, 'Schedule finished') 
         await request_status_update()
         await tools.noisy_sleep(7,3)
