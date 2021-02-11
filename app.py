@@ -540,7 +540,7 @@ async def do_something():
 
 # Schedulers
 async def planner(max_events, initial_sleep, first_time=False):
-    if my_settings['arena']['status'] or my_settings['quest']['status'] or first_time:
+    if (my_settings['arena']['status'] and status['arenas'] != 5) or my_settings['quest']['status'] or first_time:
         await tools.noisy_sleep(60*initial_sleep, 60*(initial_sleep-1))
         await request_status_update()
         await tools.noisy_sleep(7, 5)
