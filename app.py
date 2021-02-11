@@ -483,7 +483,7 @@ async def get_quest_place(text, tod):
         place = my_settings['quest'][tod]
         if place == 'Random':
             return random.choice(valid)
-        elif place in valid:
+        elif place in valid or place == 'Foray':
             return place
         else:  
             await tools.user_log(client, 'Unknown place: {} for the time: {}'.format(place, tod)) 
