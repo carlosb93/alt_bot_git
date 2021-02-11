@@ -334,7 +334,7 @@ async def set_order():
 
 ############ REPORT ############
 # Requests the report to cw
-@aiocron.crontab(cwc.minutes_after_war(9))
+@aiocron.crontab(cwc.minutes_after_war(11))
 async def report():
     if my_settings['report']['status']:
         await tools.noisy_sleep(60)
