@@ -154,7 +154,8 @@ async def reset_stuff():
 @client.on(events.NewMessage(chats=[config.GROUP,config.MAIN_ID], pattern='/help'))
 async def help(event):
     res = '<b>Commands available:</b>\n\n'
-    res += '/settings <i>Show your current configuration</i>\n'
+    res += '/settings <i>Shows your current configuration</i>\n'
+    res += '/status <i>Shows your current status</i>\n'
     res += '/settingsfull <i>Show a detailed configuration</i>\n'
     res += '/set <i>Allows you to modify your settings</i>\n'
     await tools.user_log(client, res)
