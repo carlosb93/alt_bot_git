@@ -304,10 +304,8 @@ async def ask_botniato_order(event):
 #             my_settings['order']['target']  = '🛡Defend'
 #         return save_settings()
         
-    
-# Sets the order automatically
-@aiocron.crontab(cwc.minutes_before_war(4))
-async def set_order():
+
+async def order_setter():
     if my_settings['order']['status']:
         await tools.noisy_sleep(60)
         target = my_settings['order']['target']
@@ -331,6 +329,23 @@ async def set_order():
         
         await tools.user_log(client, 'Order set!') 
 
+# Sets the order automatically
+@aiocron.crontab(cwc.minutes_before_war(4))
+async def set_order():
+    if my_settings['order']['status']:
+        if not my_settings['order']['aiming']:
+            await order_setter()
+        else:
+            status['block'] = False
+            await tools.user_log(client, 'Unloking quest to aimers') 
+
+
+@aiocron.crontab(cwc.minutes_before_war(60))
+async def set_order():
+    if my_settings['order']['status'] and my_settings['order']['aiming']:
+        await order_setter()
+        status['block'] = True
+        await tools.user_log(client, 'Loking quest to aimers') 
 
 ############ REPORT ############
 # Requests the report to cw

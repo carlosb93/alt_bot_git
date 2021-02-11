@@ -47,6 +47,10 @@ all_settings = {
             "source": {
                 "validator": ["botniato", "default"],
                 "default": "botniato" 
+            },
+            "aiming": {
+                "validator": [True, False],
+                "default": False
             }
         }    
     },
