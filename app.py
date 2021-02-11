@@ -340,7 +340,7 @@ async def set_order():
             await tools.user_log(client, 'Unloking quest to aimers') 
 
 
-@aiocron.crontab(cwc.minutes_before_war(60))
+@aiocron.crontab(cwc.minutes_before_war(59))
 async def set_order():
     if my_settings['order']['status'] and my_settings['order']['aiming']:
         await order_setter()
