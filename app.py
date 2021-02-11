@@ -528,7 +528,7 @@ async def do_something():
     await request_status_update()
     await tools.noisy_sleep(10,6)
     if status['state'] in ['🛌Rest', '⚒At the shop', '⚗️At the shop']:
-        if status['current_stamina'] > 0 and status['current_hp'] > my_settings['quest']['min_hp']:
+        if status['current_stamina'] > 1 and status['current_hp'] > my_settings['quest']['min_hp']:
             await client.send_message(config.CHAT_WARS, '🗺Quests')
             return True
         elif status['arenas'] < 5 and status['current_hp'] > my_settings['arena']['min_hp'] and status['gold'] > 5:
