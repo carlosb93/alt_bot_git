@@ -8,7 +8,7 @@
     "current_hp": 0,
     "max_hp": 0,
     "max_mana": 0,
-    "mana": 0,
+    "current_mana": 0,
     "daily_craft": 1,
     "arenas": 0,
     "gold": 0,
