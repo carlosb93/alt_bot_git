@@ -190,5 +190,14 @@ all_settings = {
                 "default": False
             }
         } 
-    }
+    },
+    "extra_craft": {
+        "emoji": '⚒️💧',
+        "subsetts": {
+            "status": {
+                "validator": [True, False],
+                "default": False
+            },
+        }
+    } 
 }

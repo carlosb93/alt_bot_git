@@ -97,6 +97,8 @@ async def update_status(event):
     status['max_stamina'] = int(re.search(r'Stamina: (\d+)/(\d+)', event.raw_text).group(2))
     status['current_hp'] = int(re.search(r'Hp: (\d+)', event.raw_text).group(1))
     status['max_hp'] = int(re.search(r'Hp: (\d+)/(\d+)', event.raw_text).group(2))
+    status['max_mana'] = int(re.search(r'Mana: (\d+)/(\d+)', event.raw_text).group(1))
+    status['mana'] = int(re.search(r'Mana: (\d+)/(\d+)', event.raw_text).group(2))
     status['state'] = re.search(r'State:\n(.*)', event.raw_text).group(1)
     lines = event.raw_text.split('\n')
     for i, line in enumerate(lines):
@@ -117,6 +119,12 @@ async def update_status(event):
             if line[0].startswith('💰'):
                 status['gold'] = int(line[1:].split()[0])
                 
+    if status['class'] in ['⚒️','⚗️','📦',]:           
+        if status['daily_craft'] == 1:
+            await daily_craft()
+        elif status['mana'] == status['max_mana'] and my_settings['extra_craft']['status'] == True:
+            await extra_craft()   
+                        
     await open_shop(intensive=True)
                 
     now = datetime.now()
@@ -136,6 +144,7 @@ async def status_all(event):
 💰 Money: {gold}
 🔋 Stamina: {current_stamina}/{max_stamina}
 ❤️ Hp: {current_hp}/{max_hp}
+💧 Mana: {current_hp}/{max_hp}
 📯 Arenas: {arenas}/5
 Block: {block}
 Curently: {state}
@@ -148,6 +157,7 @@ In CW: {time_of_day}
 @aiocron.crontab(cwc.reset_time())
 async def reset_stuff():
     status['arenas'] = 0
+    status['daily_craft'] = 1
     await tools.user_log(client, 'Counters restarted')
 
 
@@ -407,7 +417,9 @@ async def mobs_from_group(event):
 
     if my_settings['get_mobs']['status'] or my_settings['get_ambush'] ['status']:
         # Update status before choosing
-        if not status['mobsmsg'] == event.message.message:
+        lines = event.message.message.split('\n')
+        link = lines[-1]
+        if not status['mobsmsg'] == link:
             await request_status_update()
             parsed_mobs = tools.parse_monsters(event.raw_text)
             await tools.noisy_sleep(2,1)
@@ -422,20 +434,20 @@ async def mobs_from_group(event):
                 else:
                     return
                 
-                valid = ['Me fui', 'toy', 'se fue', 'next', 'estoy', 'go', 'me fui', 'entré', 'voy pa dentro']
+                valid = ['Me fui', 'toy', 'se fue', 'next', 'estoy', 'go', 'me fui', 'entré', 'voy pa dentro', '👀']
 
                 min_level = parsed_mobs['level'] - 10
                 max_level = parsed_mobs['level'] + 10
                 
                 
-                if status['level'] in range(min_level, max_level):
+                if status['level'] in range(int(min_level), int(max_level)):
                     message += ' in range.'
                     
                     await tools.noisy_sleep(5)
-                    status['mobsmsg'] = event.message.message
+                    status['mobsmsg'] = link
                     await tools.user_log(client, message)
                     await client.forward_messages(config.CHAT_WARS, event.message)
-                    await tools.noisy_sleep(5)
+                    await tools.noisy_sleep(10)
                     msg = random.choice(valid)
                     await client.send_message(config.CHAMPMOBS, msg)
                 # elif (parsed_mobs['level'] < status['level']) and is_ambush:
@@ -443,7 +455,44 @@ async def mobs_from_group(event):
                 else:
                     return
 
-               
+# Hunting other people mobs
+@client.on(events.NewMessage(chats = config.BOTNIATO, incoming = True, pattern='((.|\n)*)needs your help((.|\n)*)'))
+async def mobs_from_bot(event):
+    if 'EVENT' in event.message.message:
+        return
+    else:
+        # Check if is sleep time
+        if my_settings['sleep']['status']:
+            third = check_third_of_day()
+            if third == my_settings['sleep']['third']:
+                return
+        
+        if my_settings['get_mobs']['status'] or my_settings['get_ambush'] ['status']:
+            # Update status before choosing
+            lines = event.message.message.split('\n')
+            link = lines[-1] 
+            if not status['mobsmsg'] == link:
+                await request_status_update()
+                await tools.noisy_sleep(2,1)
+        
+                # Check if there is stamina or the player is not in other duties
+                if status['current_stamina'] > 0 and (status['state'] == '🛌Rest' or status['state'] == '⚒At the shop'): 
+                    is_ambush = 'ambush!' in event.message.message                
+                    if is_ambush and my_settings['get_ambush']['status'] and status['current_hp'] > my_settings['arena']['min_hp']: #TODO: Update with a dedicated min_hp param for ambush
+                        message = '👾Fighting ambush'
+                    elif not is_ambush and  my_settings['get_mobs']['status'] and status['current_hp'] > my_settings['arena']['min_hp']: #TODO: Update with a dedicated min_hp param for mobs
+                        message = '👾Fighting mobs from bot'
+                    else:
+                        return
+                    status['mobsmsg'] = link
+                    await tools.user_log(client, message)
+                    await client.forward_messages(config.CHAT_WARS, event.message)
+# Hunting event
+@client.on(events.NewMessage(chats = config.BOTNIATO, incoming = True, pattern='((.|\n)*)You were chosen to event fight.((.|\n)*)'))
+async def event_from_bot(event):
+    message = '👾Fighting event mobs from bot'
+    await tools.user_log(client, message)
+    await client.forward_messages(config.CHAT_WARS, event.message)
 
 
 
@@ -634,8 +683,55 @@ async def stamina_restored(event):
         if third == my_settings['sleep']['third']:
             return    
     await planner(1, 3)
-
     
+########### Daily Craft ###########
+async def daily_craft():
+    if status['state'] in ['🛌Rest', '⚒At the shop', '⚗️At the shop']:
+        if status['max_mana'] >= 100:
+            await tools.noisy_sleep(5,3)
+            await client.send_message(config.CHAT_WARS, '/c_21')
+            
+async def extra_craft():
+    if status['state'] in ['🛌Rest', '⚒At the shop', '⚗️At the shop']:
+        await tools.noisy_sleep(5,3)
+        await client.send_message(config.CHAT_WARS, '/c_36')
+            
+@client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*Not enough materials to craft *'))
+async def buy_materials(event):
+    if 'Bone powder' in event.raw_text:
+        if status['gold'] > 4:
+            lines = event.raw_text.split('\n')
+            for line in lines:
+                if 'Bone' in line and 'x' in line:
+                    amount= int(line.split(' x ')[0])
+            await tools.noisy_sleep(5,3)    
+            await client.send_message(config.CHAT_WARS, '/wtb_04_{}'.format(amount))
+            await tools.noisy_sleep(5,3)
+            
+    elif 'Quality cloth' in event.raw_text:
+        if status['gold'] > 14:
+            lines = event.raw_text.split('\n')
+            for line in lines:
+                if 'Cloth' in line and 'x' in line:
+                    cloth= int(line.split(' x ')[0])
+                if 'Powder' in line and 'x' in line:
+                    powder= int(line.split(' x ')[0])
+            await tools.noisy_sleep(5,3)    
+            await client.send_message(config.CHAT_WARS, '/wtb_09_{}'.format(cloth))
+            await tools.noisy_sleep(5,3)
+            await client.send_message(config.CHAT_WARS, '/wtb_07_{}'.format(powder))
+            await tools.noisy_sleep(5,3)
+        
+@client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*Crafted: *'))
+async def check_craft(event):
+    if '\n' in event.raw_text:
+        lines = event.raw_text.split('\n')
+        for line in lines:
+            if 'Earned:' in line:
+                await tools.noisy_sleep(5,3)
+                await daily_craft()
+            else:
+                status['daily_craft'] = 0
 
 
 async def init():
