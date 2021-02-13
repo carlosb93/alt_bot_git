@@ -700,7 +700,7 @@ async def extra_craft():
 async def buy_materials(event):
     amount= None
     code= None
-    if status['gold'] > my_settings['daily_craft']['gold']:
+    if int(status['gold']) > int(my_settings['daily_craft']['gold']):
         lines = event.raw_text.split('\n')
         for line in lines:
             if ' x ' in line:
