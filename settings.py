@@ -197,7 +197,7 @@ all_settings = {
             "status": {
                 "validator": [True, False],
                 "default": False
-            },
+            }
         }
     } 
 }
