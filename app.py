@@ -684,14 +684,14 @@ async def stamina_restored(event):
     
 ########### Daily Craft ###########
 async def daily_craft():
-    if status['state'] in ['🛌Rest', '⚒At the shop', '⚗️At the shop']:
+    if status['state'] in ['🛌Rest', '⚒At the shop', '⚗️At the shop'] and status['max_mana'] != 0:
         if status['current_mana'] >= 100:
             to_craft = '/{}'.format(my_settings['daily_craft']['craft'])
             await tools.noisy_sleep(5,3)
             await client.send_message(config.CHAT_WARS, to_craft)
             
 async def extra_craft():
-    if status['state'] in ['🛌Rest', '⚒At the shop', '⚗️At the shop']:
+    if status['state'] in ['🛌Rest', '⚒At the shop', '⚗️At the shop'] and status['max_mana'] != 0:
         to_craft = '/{}'.format(my_settings['extra_craft']['craft'])
         await tools.noisy_sleep(5,3)
         await client.send_message(config.CHAT_WARS, to_craft)
