@@ -75,7 +75,7 @@ async def open_shop(intensive=False):
         await client.send_message(config.CHAT_WARS, '/myshop_open') 
 
 # open shop after battle
-@aiocron.crontab(cwc.minutes_after_war(10))
+@aiocron.crontab(cwc.minutes_after_war(15))
 async def openshop():
     await open_shop(intensive=True)
 
@@ -119,7 +119,7 @@ async def update_status(event):
             if line[0].startswith('💰'):
                 status['gold'] = int(line[1:].split()[0])
                 
-    if status['class'] in ['⚒️','⚗️','📦',]:           
+    if status['class'] in ['⚒️','⚗️','📦'] and my_settings['daily_craft']['status'] == True:           
         if status['daily_craft'] == 1:
             await daily_craft()
         elif status['mana'] == status['max_mana'] and my_settings['extra_craft']['status'] == True:
@@ -495,8 +495,6 @@ async def event_from_bot(event):
     await client.forward_messages(config.CHAT_WARS, event.message)
 
 
-
-
 ############ QUESTS AND ARENAS ############
 @client.on(events.NewMessage(chats=config.CHAT_WARS, pattern='((.|\n)*)Dirty air is soaked with the thick smell of blood((.|\n)*)'))
 async def clicking_arena(event): 
@@ -688,39 +686,33 @@ async def stamina_restored(event):
 async def daily_craft():
     if status['state'] in ['🛌Rest', '⚒At the shop', '⚗️At the shop']:
         if status['max_mana'] >= 100:
+            to_craft = '/{}'.format(my_settings['daily_craft']['craft'])
             await tools.noisy_sleep(5,3)
-            await client.send_message(config.CHAT_WARS, '/c_21')
+            await client.send_message(config.CHAT_WARS, to_craft)
             
 async def extra_craft():
     if status['state'] in ['🛌Rest', '⚒At the shop', '⚗️At the shop']:
+        to_craft = '/{}'.format(my_settings['extra_craft']['craft'])
         await tools.noisy_sleep(5,3)
-        await client.send_message(config.CHAT_WARS, '/c_36')
+        await client.send_message(config.CHAT_WARS, to_craft)
             
 @client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*Not enough materials to craft *'))
 async def buy_materials(event):
-    if 'Bone powder' in event.raw_text:
-        if status['gold'] > 4:
-            lines = event.raw_text.split('\n')
-            for line in lines:
-                if 'Bone' in line and 'x' in line:
-                    amount= int(line.split(' x ')[0])
-            await tools.noisy_sleep(5,3)    
-            await client.send_message(config.CHAT_WARS, '/wtb_04_{}'.format(amount))
-            await tools.noisy_sleep(5,3)
-            
-    elif 'Quality cloth' in event.raw_text:
-        if status['gold'] > 14:
-            lines = event.raw_text.split('\n')
-            for line in lines:
-                if 'Cloth' in line and 'x' in line:
-                    cloth= int(line.split(' x ')[0])
-                if 'Powder' in line and 'x' in line:
-                    powder= int(line.split(' x ')[0])
-            await tools.noisy_sleep(5,3)    
-            await client.send_message(config.CHAT_WARS, '/wtb_09_{}'.format(cloth))
-            await tools.noisy_sleep(5,3)
-            await client.send_message(config.CHAT_WARS, '/wtb_07_{}'.format(powder))
-            await tools.noisy_sleep(5,3)
+    amount= None
+    code= None
+    if status['gold'] > my_settings['daily_craft']['gold']:
+        lines = event.raw_text.split('\n')
+        for line in lines:
+            if ' x ' in line:
+                amount= int(line.split(' x ')[0])
+                resource = line.split(' x ')[1].strip()
+                if resource in tools.resource_list.keys():
+                    code = tools.resource_list[resource] 
+                if code != None and amount != None:
+                    await tools.noisy_sleep(5,3)    
+                    await client.send_message(config.CHAT_WARS, '/wtb_{}_{}'.format(code,amount))
+
+                
         
 @client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*Crafted: *'))
 async def check_craft(event):
@@ -732,6 +724,8 @@ async def check_craft(event):
                 await daily_craft()
             else:
                 status['daily_craft'] = 0
+    else:
+        status['daily_craft'] = 0
 
 
 async def init():

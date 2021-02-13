@@ -227,3 +227,18 @@ def parse_lot(text):
     else:
         bet = '{}_{}'.format(bet_link, precio)
     return {"bet_link": bet, "quality": quality, "precio": precio, "gear": autg }
+
+
+resource_list = {
+'Thread': '01',
+'Stick': '02',
+'Pelt': '03',
+'Bone': '04',
+'Coal': '05',
+'Charcoal': '06',
+'Powder': '07',
+'Iron ore': '08',
+'Cloth': '09',
+'Silver ore': '10',
+'Bauxite': '11'
+}

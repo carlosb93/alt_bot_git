@@ -197,7 +197,28 @@ all_settings = {
             "status": {
                 "validator": [True, False],
                 "default": False
+            },
+            "craft": {
+                "validator": ["c_24","c_33", "c_27", "c_28", "c_36"],
+                "default": "c_36"
+            } 
+        } 
+    },
+    "daily_craft": {
+        "emoji": '⚒️',
+        "subsetts": {
+            "status": {
+                "validator": [True, False],
+                "default": True
+            },
+            "craft": {
+                "validator": ["c_14","c_19", "c_20", "c_21", "c_22", "c_23", "c_24"],
+                "default": "c_19"
+            },
+            "gold": {
+                "validator": "int",
+                "default": "20"
             }
-        }
-    } 
+        } 
+    }
 }
