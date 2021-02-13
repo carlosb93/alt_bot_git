@@ -144,7 +144,7 @@ async def status_all(event):
 💰 Money: {gold}
 🔋 Stamina: {current_stamina}/{max_stamina}
 ❤️ Hp: {current_hp}/{max_hp}
-💧 Mana: {current_hp}/{max_hp}
+💧 Mana: {max_mana}/{mana}
 📯 Arenas: {arenas}/5
 Block: {block}
 Curently: {state}
@@ -700,17 +700,18 @@ async def extra_craft():
 async def buy_materials(event):
     amount= None
     code= None
-    if int(status['gold']) > int(my_settings['daily_craft']['gold']):
-        lines = event.raw_text.split('\n')
-        for line in lines:
-            if ' x ' in line:
-                amount= int(line.split(' x ')[0])
-                resource = line.split(' x ')[1].strip()
-                if resource in tools.resource_list.keys():
-                    code = tools.resource_list[resource] 
-                if code != None and amount != None:
-                    await tools.noisy_sleep(5,3)    
-                    await client.send_message(config.CHAT_WARS, '/wtb_{}_{}'.format(code,amount))
+    if my_settings['daily_craft']['status'] == True:
+        if int(status['gold']) > int(my_settings['daily_craft']['gold']):
+            lines = event.raw_text.split('\n')
+            for line in lines:
+                if ' x ' in line:
+                    amount= int(line.split(' x ')[0])
+                    resource = line.split(' x ')[1].strip()
+                    if resource in tools.resource_list.keys():
+                        code = tools.resource_list[resource] 
+                    if code != None and amount != None:
+                        await tools.noisy_sleep(5,3)    
+                        await client.send_message(config.CHAT_WARS, '/wtb_{}_{}'.format(code,amount))
 
                 
         
