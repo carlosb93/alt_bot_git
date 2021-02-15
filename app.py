@@ -122,8 +122,8 @@ async def update_status(event):
     if status['class'] in ['⚒️','⚗️','📦'] and my_settings['daily_craft']['status'] == True:           
         if status['daily_craft'] == 1:
             await daily_craft()
-        elif status['current_mana'] == status['max_mana'] and my_settings['extra_craft']['status'] == True:
-            await extra_craft()   
+    if status['current_mana'] == status['max_mana'] and my_settings['extra_craft']['status'] == True:
+        await extra_craft()   
                         
     await open_shop(intensive=True)
                 
@@ -700,18 +700,34 @@ async def extra_craft():
 async def buy_materials(event):
     amount= None
     code= None
+
     if my_settings['daily_craft']['status'] == True:
         if int(status['gold']) > int(my_settings['daily_craft']['gold']):
             lines = event.raw_text.split('\n')
-            for line in lines:
-                if ' x ' in line:
-                    amount= int(line.split(' x ')[0])
-                    resource = line.split(' x ')[1].strip()
-                    if resource in tools.resource_list.keys():
-                        code = tools.resource_list[resource] 
-                    if code != None and amount != None:
-                        await tools.noisy_sleep(5,3)    
-                        await client.send_message(config.CHAT_WARS, '/wtb_{}_{}'.format(code,amount))
+            if lines[0].split('craft ')[1] in ['Steel.','Bone powder.','Coke.','String.']:
+                
+                for line in lines:
+                    if ' x ' in line:
+                        amount= int(line.split(' x ')[0])
+                        resource = line.split(' x ')[1].strip()
+                        if resource in tools.resource_list.keys():
+                            code = tools.resource_list[resource] 
+                        if code != None and amount != None:
+                            await tools.noisy_sleep(5,3)    
+                            await client.send_message(config.CHAT_WARS, '/wtb_{}_{}'.format(code,amount))
+                            
+            elif lines[0].split('craft ')[1] in ['Purified powder.','Metal plate.','Steel mold.','Silver mold.','Quality cloth.']:
+                if my_settings['extra_craft']['status'] == True:
+                    for line in lines:
+                        if ' x ' in line:
+                            amount= int(line.split(' x ')[0])
+                            resource = line.split(' x ')[1].strip()
+                            if resource in tools.resource_list.keys():
+                                code = tools.resource_list[resource] 
+                            if code != None and amount != None:
+                                await tools.noisy_sleep(5,3)    
+                                await client.send_message(config.CHAT_WARS, '/wtb_{}_{}'.format(code,amount))
+                
 
                 
         

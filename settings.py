@@ -93,19 +93,19 @@ all_settings = {
             }, 
             "morning": {
                 "validator": ["Random", "Swamp", "Forest", "Valley", "Foray", None],
-                "default": "Swamp"
+                "default": "Forest"
             },
             "day": {
                 "validator": ["Random", "Swamp", "Forest", "Valley", "Foray", None],
-                "default": "Forest"
+                "default": "Valley"
             },
             "evening": {
                 "validator": ["Random", "Swamp", "Forest", "Valley", "Foray", None],
-                "default": "Valley"
+                "default": "Forest"
             },
             "night": {
                 "validator": ["Random", "Swamp", "Forest", "Valley", "Foray", None],
-                "default": "Random"
+                "default": "Valley"
             },
             "fire": {
                 "validator": [True, False],
@@ -212,7 +212,7 @@ all_settings = {
                 "default": True
             },
             "craft": {
-                "validator": ["c_14","c_19", "c_20", "c_21", "c_22", "c_23", "c_24"],
+                "validator": ["c_19", "c_21", "c_22", "c_23"],
                 "default": "c_19"
             },
             "gold": {
