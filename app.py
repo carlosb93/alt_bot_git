@@ -350,12 +350,13 @@ async def set_order():
             await tools.user_log(client, 'Unloking quest to aimers') 
 
 
-@aiocron.crontab(cwc.minutes_before_war(42))
-async def set_order():
+@aiocron.crontab(cwc.minutes_before_war(48))
+async def set_order_aiming():
     if my_settings['order']['status'] and my_settings['order']['aiming']:
-        await order_setter()
         status['block'] = True
         await tools.user_log(client, 'Loking quest to aimers') 
+        await tools.noisy_sleep(360, 330)
+        await order_setter()
 
 ############ REPORT ############
 # Requests the report to cw
