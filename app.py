@@ -119,7 +119,7 @@ async def update_status(event):
             if line[0].startswith('💰'):
                 status['gold'] = int(line[1:].split()[0])
                 
-    if status['class'] in ['⚒️','⚗️','📦'] and my_settings['daily_craft']['status'] == True:           
+    if my_settings['daily_craft']['status'] == True:           
         if status['daily_craft'] == 1:
             await daily_craft()
     if status['current_mana'] == status['max_mana'] and my_settings['extra_craft']['status'] == True:
