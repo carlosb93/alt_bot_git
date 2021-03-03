@@ -350,7 +350,7 @@ async def set_order():
             await tools.user_log(client, 'Unloking quest to aimers') 
 
 
-@aiocron.crontab(cwc.minutes_before_war(59))
+@aiocron.crontab(cwc.minutes_before_war(42))
 async def set_order():
     if my_settings['order']['status'] and my_settings['order']['aiming']:
         await order_setter()
@@ -359,7 +359,7 @@ async def set_order():
 
 ############ REPORT ############
 # Requests the report to cw
-@aiocron.crontab(cwc.minutes_after_war(11))
+@aiocron.crontab(cwc.minutes_after_war(13))
 async def report():
     if my_settings['report']['status']:
         await tools.noisy_sleep(60)
@@ -643,7 +643,7 @@ async def morning_planner():
         if third == my_settings['sleep']['third']:
             return
     if my_settings['quest']['morning']:
-        await planner(12, 12)
+        await planner(10, 15)
     
 @aiocron.crontab(cwc.day())
 async def day_planner():
