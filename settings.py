@@ -209,7 +209,7 @@ all_settings = {
         "subsetts": {
             "status": {
                 "validator": [True, False],
-                "default": True
+                "default": False
             },
             "craft": {
                 "validator": ["c_19", "c_21", "c_22", "c_23"],
