@@ -97,8 +97,12 @@ async def update_status(event):
     status['max_stamina'] = int(re.search(r'Stamina: (\d+)/(\d+)', event.raw_text).group(2))
     status['current_hp'] = int(re.search(r'Hp: (\d+)', event.raw_text).group(1))
     status['max_hp'] = int(re.search(r'Hp: (\d+)/(\d+)', event.raw_text).group(2))
-    status['current_mana'] = int(re.search(r'Mana: (\d+)', event.raw_text).group(1))
-    status['max_mana'] = int(re.search(r'Mana: (\d+)/(\d+)', event.raw_text).group(2))
+    try:
+        status['current_mana'] = int(re.search(r'Mana: (\d+)', event.raw_text).group(1))
+        status['max_mana'] = int(re.search(r'Mana: (\d+)/(\d+)', event.raw_text).group(2))
+    except AttributeError:
+        status['current_mana'] = 0
+        status['max_mana'] = 0
     status['state'] = re.search(r'State:\n(.*)', event.raw_text).group(1)
     lines = event.raw_text.split('\n')
     for i, line in enumerate(lines):
