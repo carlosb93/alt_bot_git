@@ -297,6 +297,13 @@ async def get_botniato_order(event):
         await tools.user_log(client, 'Order saved from botniato\n{}'.format(my_settings['order']['target']))
         return save_settings()
 
+@client.on(events.NewMessage(chats=config.BOTNIATO, pattern='.*⚠️ For security reasons*'))
+async def get_botniato_pass_code_order(event):
+    if my_settings['order']['status'] and my_settings['order']['source'] == 'botniato':
+        command = event.message.text.split('/n')[-1]
+        await client.send_message(config.BOTNIATO, command)
+        await tools.user_log(client, 'Order requested from botniato (with passcode)')
+
 # Requests order from botniato
 @client.on(events.NewMessage(chats=config.BOTNIATO, pattern='((.|\n)*)Check the ⚜️ Order button((.|\n)*)'))
 async def ask_botniato_order(event):
