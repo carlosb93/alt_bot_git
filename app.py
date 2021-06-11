@@ -300,7 +300,7 @@ async def get_botniato_order(event):
 @client.on(events.NewMessage(chats=config.BOTNIATO, pattern='.*⚠️ For security reasons*'))
 async def get_botniato_pass_code_order(event):
     if my_settings['order']['status'] and my_settings['order']['source'] == 'botniato':
-        command = event.message.text.split('/n')[-1]
+        command = '/' + event.message.text.split('/')[-1]
         await client.send_message(config.BOTNIATO, command)
         await tools.user_log(client, 'Order requested from botniato (with passcode)')
 
