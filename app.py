@@ -440,7 +440,7 @@ async def mobs_from_group(event):
             if status['current_stamina'] > 0 and (status['state'] in ['🛌Rest', '⚒At the shop', '⚗️At the shop']): 
                 is_ambush = 'ambush!' in event.message.message                
                 if is_ambush and my_settings['get_ambush']['status'] and status['current_hp'] > my_settings['arena']['min_hp']: #TODO: Update with a dedicated min_hp param for ambush
-                    message = '👾Fighting ambush'
+                    message = '👾Fighting ambush from group'
                 elif not is_ambush and  my_settings['get_mobs']['status'] and status['current_hp'] > my_settings['arena']['min_hp']: #TODO: Update with a dedicated min_hp param for mobs
                     message = '👾Fighting mobs from group'
                 else:
@@ -490,9 +490,9 @@ async def mobs_from_bot(event):
                 # Check if there is stamina or the player is not in other duties
                 if status['current_stamina'] > 0 and (status['state'] == '🛌Rest' or status['state'] == '⚒At the shop'): 
                     is_ambush = 'ambush!' in event.message.message                
-                    if is_ambush and my_settings['get_ambush']['status'] and status['current_hp'] > my_settings['arena']['min_hp']: #TODO: Update with a dedicated min_hp param for ambush
-                        message = '👾Fighting ambush'
-                    elif not is_ambush and  my_settings['get_mobs']['status'] and status['current_hp'] > my_settings['arena']['min_hp']: #TODO: Update with a dedicated min_hp param for mobs
+                    if is_ambush and my_settings['get_ambush']['status'] and status['current_hp'] > my_settings['get_ambush']['min_hp']: 
+                        message = '👾Fighting ambush from bot'
+                    elif not is_ambush and  my_settings['get_mobs']['status'] and status['current_hp'] > my_settings['get_mobs']['min_hp']: 
                         message = '👾Fighting mobs from bot'
                     else:
                         return

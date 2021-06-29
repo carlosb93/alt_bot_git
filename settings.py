@@ -150,9 +150,17 @@ all_settings = {
                 "validator": [True, False],
                 "default": False
             }, 
+            "min_hp": {
+                "validator": "int",
+                "default": 350
+            }, 
             "from_group": {
                 "validator": "int",
                 "default": 1066757737
+            }, 
+            "from_botniato": {
+                "validator": [True, False],
+                "default": False
             }
         }    
     },
@@ -163,9 +171,17 @@ all_settings = {
                 "validator": [True, False],
                 "default": False
             }, 
+            "min_hp": {
+                "validator": "int",
+                "default": 350
+            }, 
             "from_group": {
                 "validator": "int",
                 "default": 1066757737
+            }, 
+            "from_botniato": {
+                "validator": [True, False],
+                "default": False
             }
         }    
     },
