@@ -713,7 +713,7 @@ async def buy_materials(event):
     amount= None
     code= None
 
-    if my_settings['daily_craft']['status'] == True:
+    if my_settings['daily_craft']['status']:
         if int(status['gold']) > int(my_settings['daily_craft']['gold']):
             lines = event.raw_text.split('\n')
             if lines[0].split('craft ')[1] in ['Steel.','Bone powder.','Coke.','String.']:
@@ -745,16 +745,15 @@ async def buy_materials(event):
         
 @client.on(events.NewMessage(chats = config.CHAT_WARS , incoming = True, pattern='.*Crafted: *'))
 async def check_craft(event):
-    if '\n' in event.raw_text:
-        lines = event.raw_text.split('\n')
-        for line in lines:
-            if 'Earned:' in line:
+    if my_settings['daily_craft']['status']:
+        if '\n' in event.raw_text:
+            if 'Earned:' in lines:
                 await tools.noisy_sleep(5,3)
                 await daily_craft()
             else:
                 status['daily_craft'] = 0
-    else:
-        status['daily_craft'] = 0
+        else:
+            status['daily_craft'] = 0
 
 
 async def init():
