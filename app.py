@@ -605,7 +605,7 @@ async def do_something():
         if status['arenas'] < 5 and status['current_hp'] > my_settings['arena']['min_hp'] and status['gold'] > 5:
             await client.send_message(config.CHAT_WARS, '🗺Quests')
             return True
-        elif status['current_stamina'] > 1 and status['current_hp'] > my_settings['quest']['min_hp']:
+        elif status['current_stamina'] > my_settings['quest']['min_stamina'] and status['current_hp'] > my_settings['quest']['min_hp']:
             await client.send_message(config.CHAT_WARS, '🗺Quests')
             return True
         

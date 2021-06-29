@@ -91,6 +91,10 @@ all_settings = {
                 "validator": "int",
                 "default": 350
             }, 
+            "min_stamina": {
+                "validator": "int",
+                "default": 0
+            }, 
             "morning": {
                 "validator": ["Random", "Swamp", "Forest", "Valley", "Foray", None],
                 "default": "Forest"
