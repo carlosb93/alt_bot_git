@@ -164,6 +164,15 @@ async def reset_stuff():
     status['daily_craft'] = 1
     await tools.user_log(client, 'Counters restarted')
 
+############ BATTLE REPORT FORWARDING ############
+# Show current commands
+@client.on(events.NewMessage(chats=[-1001108112459]))
+async def report_available(event):
+    if config.USERNAME == '@selfiestick':
+        try:
+            await client.forward_messages(-1001551516537, event.message)  
+        except ValueError:
+            print('Telethon error')
 
 ############ HELP ############
 # Show current commands
