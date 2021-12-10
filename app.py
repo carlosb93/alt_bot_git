@@ -298,7 +298,7 @@ async def trader(event):
 
 
 ############ BATTLES ############
-# Gets order from botniato
+# Gets order from botniato english
 @client.on(events.NewMessage(chats=config.BOTNIATO, pattern='.*Orders for next battle*'))
 async def get_botniato_order(event):
     if my_settings['order']['status'] and my_settings['order']['source'] == 'botniato':
@@ -306,18 +306,42 @@ async def get_botniato_order(event):
         await tools.user_log(client, 'Order saved from botniato\n{}'.format(my_settings['order']['target']))
         return save_settings()
 
-@client.on(events.NewMessage(chats=config.BOTNIATO, pattern='.*⚠️ For security reasons*'))
+# Gets order from botniato spanish
+@client.on(events.NewMessage(chats=config.BOTNIATO, pattern='.*Órdenes para la próxima batalla*'))
+async def get_botniato_order(event):
+    if my_settings['order']['status'] and my_settings['order']['source'] == 'botniato':
+        my_settings['order']['target'] = '/ga_' + event.message.text.split('url?url=/ga_')[1].split()[0].split(')')[0]
+        await tools.user_log(client, 'Order saved from botniato\n{}'.format(my_settings['order']['target']))
+        return save_settings()
+
+# Set passcode english
+@client.on(events.NewMessage(chats=config.BOTNIATO, pattern='.*For security reasons*'))
 async def get_botniato_pass_code_order(event):
     if my_settings['order']['status'] and my_settings['order']['source'] == 'botniato':
         command = '/' + event.message.text.split('/')[-1]
         await client.send_message(config.BOTNIATO, command)
         await tools.user_log(client, 'Order requested from botniato (with passcode)')
 
-# Requests order from botniato
-@client.on(events.NewMessage(chats=config.BOTNIATO, pattern='((.|\n)*)Check the ⚜️ Order button((.|\n)*)'))
+# Set passcode spanish
+@client.on(events.NewMessage(chats=config.BOTNIATO, pattern='.*Por motivos de seguridad*'))
+async def get_botniato_pass_code_order(event):
+    if my_settings['order']['status'] and my_settings['order']['source'] == 'botniato':
+        command = '/' + event.message.text.split('/')[-1]
+        await client.send_message(config.BOTNIATO, command)
+        await tools.user_log(client, 'Order requested from botniato (with passcode)')
+
+# Requests order from botniato esp
+@client.on(events.NewMessage(chats=config.BOTNIATO, pattern='.*Buzzing Tailor envió las órdenes*'))
 async def ask_botniato_order(event):
     if my_settings['order']['status'] and my_settings['order']['source'] == 'botniato':
-        await client.send_message(config.BOTNIATO, '⚜️ Order')
+        await client.send_message(config.BOTNIATO, '/order')
+        await tools.user_log(client, 'Order requested to botniato')   
+
+# Requests order from botniato eng
+@client.on(events.NewMessage(chats=config.BOTNIATO, pattern='.*Buzzing Tailor just set the orders*'))
+async def ask_botniato_order(event):
+    if my_settings['order']['status'] and my_settings['order']['source'] == 'botniato':
+        await client.send_message(config.BOTNIATO, '/order')
         await tools.user_log(client, 'Order requested to botniato')   
 
 # TODO: Test this before moving to production (ORDER_ID undefined, all_settings validator has no attribute squad, etc)
@@ -508,12 +532,12 @@ async def mobs_from_bot(event):
                     status['mobsmsg'] = link
                     await tools.user_log(client, message)
                     await client.forward_messages(config.CHAT_WARS, event.message)
-# Hunting event
-@client.on(events.NewMessage(chats = config.BOTNIATO, incoming = True, pattern='((.|\n)*)You were chosen to event fight.((.|\n)*)'))
-async def event_from_bot(event):
-    message = '👾Fighting event mobs from bot'
-    await tools.user_log(client, message)
-    await client.forward_messages(config.CHAT_WARS, event.message)
+# # Hunting event
+# @client.on(events.NewMessage(chats = config.BOTNIATO, incoming = True, pattern='((.|\n)*)You were chosen to event fight.((.|\n)*)'))
+# async def event_from_bot(event):
+#     message = '👾Fighting event mobs from bot'
+#     await tools.user_log(client, message)
+#     await client.forward_messages(config.CHAT_WARS, event.message)
 
 
 ############ QUESTS AND ARENAS ############
