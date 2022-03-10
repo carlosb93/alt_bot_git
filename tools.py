@@ -13,6 +13,8 @@ emojis = {
     'Blacksmith': '⚒️',
     'Alchemist': '⚗️',
     'Collector': '📦',
+    'Berserker': '🩸',
+    'Noble': '🎩',
     'Master': '🐣',
     'Esquire': '🐣'
 }
