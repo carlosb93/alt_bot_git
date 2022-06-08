@@ -580,17 +580,18 @@ async def go_to_quest(place, event):
 
 async def get_quest_place(text, tod):
     valid = ['Swamp', 'Valley', 'Forest']
-    if my_settings['quest']['fire'] and '🔥' in text:
-        quests = {'Swamp': 'Swamp', 'Mountain': 'Valley', 'Forest': 'Forest'}
-        lines = text.split('\n')
-        for line in lines:
-            if len(line) and line[-1] == '🔥':
-                place = line[1:].split()[0]
-                for k in quests.keys():
-                    if str(k) in place:
-                        return quests[k]
+    if my_settings['quest']['fire']:
+        if '🔥' in text or '🎩' in text:
+            quests = {'Swamp': 'Swamp', 'Mountain': 'Valley', 'Forest': 'Forest'}
+            lines = text.split('\n')
+            for line in lines:
+                if len(line) and line[-1] in ['🔥', '🎩']:
+                    place = line[1:].split()[0]
+                    for k in quests.keys():
+                        if str(k) in place:
+                            return quests[k]
 
-    elif tod in my_settings['quest'].keys():
+    if tod in my_settings['quest'].keys():
         place = my_settings['quest'][tod]
         if place == 'Random':
             return random.choice(valid)
